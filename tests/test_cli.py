@@ -131,6 +131,8 @@ def test_check_package_and_deploy(project: Path, capsys: pytest.CaptureFixture[s
     assert run("check", root=project) == 0
     assert run("package", root=project) == 0
     assert (project / "dist" / "flightwall.zip").exists()
+    assert run("package", "--channel-only", root=project) == 0
+    assert (project / "dist" / "flightwall-channel.zip").exists()
     assert (
         run(
             "package",
@@ -383,6 +385,7 @@ def test_commands_refuse_broken_channel(project: Path, capsys: pytest.CaptureFix
 def test_all_command(project: Path) -> None:
     assert run("all", "--regions", "conus", "--px-per-deg", "2", root=project) == 0
     assert (project / "dist" / "flightwall.zip").exists()
+    assert (project / "dist" / "flightwall-channel.zip").exists()
     assert (project / "dist" / "flightwall-screensaver.zip").exists()
     assert run("all", "--regions", "nowhere", root=project) == 2
     (project / "roku" / "source" / "lib.brs").write_text("sub broken()\n", encoding="utf-8")

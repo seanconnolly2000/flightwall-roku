@@ -39,17 +39,37 @@ uv run flightwall deploy                          # optional: put the interactiv
 > `.pkg` produced by `flightwall sign` (that is, signed by the Roku with your genkey key) is
 > accepted, for Beta channels and public channels alike.
 
+## Which package for which submission
+
+Roku's static analysis treats a **channel** and a **screensaver** as different app types, and
+rejects anything that mixes them: a channel may not contain screensaver entry points or
+`screensaver_*` manifest attributes, and a screensaver may not contain `Main()`. The tooling
+builds a clean package for each:
+
+| Dashboard type | Build | Produce the `.pkg` |
+|---|---|---|
+| Channel | `--channel-only` (no screensaver code or manifest lines) | `flightwall deploy --channel-only` then `flightwall sign --out dist/flightwall-channel.pkg` |
+| Screensaver | `--screensaver-only` (no `Main()`) | `flightwall deploy --screensaver-only` then `flightwall sign` |
+
+The default combined build is only for local side-loading. Set the matching type when you create
+the channel in the dashboard; analysing a screensaver package under type "channel" reports
+"Main() or RunUserInterface() function is missing" and three "in-channel screensaver" errors.
+
+Other static-analysis requirements already met by the current manifest and code: `rsg_version=1.3`
+with minimum Roku OS 15.1, no `subtitle` attribute, no `InitClientCertificates()`, and the
+roAppMemoryMonitor / low-memory event integration (mandatory for certification since
+October 2026). Name the channel plainly "FlightWall": names containing "Roku" are flagged.
+
 ## Beta channel (optional first step)
 
 A Beta channel lets up to 20 people install the channel from a link without side-loading, with no
 certification review. It expires after 120 days and cannot be renewed (create a new one). Use
 **Manage My Channels > Add Channel > Beta** and upload a `.pkg`:
 
-- `dist/flightwall.pkg`: the full interactive channel (map, settings screen, Play for the log).
-  Sign it with the interactive build installed: `flightwall deploy` then
-  `flightwall sign --out dist/flightwall.pkg`.
-- `dist/flightwall-screensaver.pkg`: the screensaver-only build for the Screensavers menu.
-  Sign it with that build installed: `flightwall deploy --screensaver-only` then `flightwall sign`.
+- `dist/flightwall-channel.pkg`: the interactive channel (map, settings screen, Play for the log),
+  for a Beta channel of type "channel".
+- `dist/flightwall-screensaver.pkg`: the screensaver-only build, for a Beta channel of type
+  "screensaver".
 
 ## 3. Dashboard
 
@@ -60,9 +80,9 @@ In the Developer Dashboard choose **Manage My Channels > Add Channel > Developer
    (`roku/images/icon_focus_*.png`), the screenshots in `store/screenshots/`, and the privacy
    policy URL. Content rating: all audiences.
 3. **Monetization**: none.
-4. **Package Upload**: upload `dist/flightwall-screensaver.pkg`, set the version (match the
-   manifest) and minimum firmware (Roku OS 11 or later is a safe floor; the app uses
-   StandardKeyboardDialog, which needs OS 10+).
+4. **Package Upload**: upload `dist/flightwall-screensaver.pkg` (or `flightwall-channel.pkg`
+   for a channel-type listing), set the version to match the manifest, and set the minimum
+   firmware to Roku OS 15.1, which `rsg_version=1.3` requires.
 5. **Static Analysis**: run it and fix anything it flags.
 6. **Preview and Publish**: review, then **Submit for publishing**. Roku emails the result.
 

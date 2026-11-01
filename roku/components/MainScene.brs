@@ -152,6 +152,27 @@ sub logEvent(event as String, detail as String)
     if m.diag.visible then m.diag.lines = m.audit
 end sub
 
+' Memory snapshots from the main thread: log warnings always, routine readings only
+' when usage moved by five points or more.
+sub onMemoryStatus()
+    status = m.top.memoryStatus
+    if not Util_IsAA(status) then return
+    percent = Util_ToInt(status.percent, -1)
+    reason = Util_Str(status.reason)
+    if m.lastMemoryPercent = invalid then m.lastMemoryPercent = -100
+    routine = (reason = "periodic" or reason = "start")
+    if routine and percent >= 0 and Abs(percent - m.lastMemoryPercent) < 5 then return
+    m.lastMemoryPercent = percent
+    detail = ""
+    if percent >= 0 then detail = percent.ToStr() + "% of app memory limit"
+    availableKb = Util_ToInt(status.availableKb, -1)
+    if availableKb >= 0 then detail = detail + ", " + (availableKb \ 1024).ToStr() + " MB available"
+    if detail = "" then detail = "memory monitor not supported on this device"
+    if not routine then detail = reason + ": " + detail
+    logEvent("memory", detail)
+    if reason = "warning" or percent >= 85 then Audit_Save(m.audit)
+end sub
+
 ' Entry point after launch and after every settings change.
 sub start()
     m.top.setFocus(true)

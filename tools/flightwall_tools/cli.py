@@ -139,8 +139,12 @@ def cmd_check(_args: argparse.Namespace, paths: Paths) -> int:
     return 1 if issues else 0
 
 
-def _package_name(with_tests: bool, screensaver_only: bool) -> str:
-    base = "flightwall-screensaver" if screensaver_only else "flightwall"
+def _package_name(with_tests: bool, screensaver_only: bool, channel_only: bool = False) -> str:
+    base = "flightwall"
+    if screensaver_only:
+        base = "flightwall-screensaver"
+    elif channel_only:
+        base = "flightwall-channel"
     return f"{base}-tests.zip" if with_tests else f"{base}.zip"
 
 
@@ -149,11 +153,17 @@ def _package(
     *,
     with_tests: bool = False,
     screensaver_only: bool = False,
+    channel_only: bool = False,
     out: str | None = None,
 ) -> Path:
-    out_path = Path(out) if out else paths.dist / _package_name(with_tests, screensaver_only)
+    name = _package_name(with_tests, screensaver_only, channel_only)
+    out_path = Path(out) if out else paths.dist / name
     included = build_package(
-        paths.roku, out_path, with_tests=with_tests, screensaver_only=screensaver_only
+        paths.roku,
+        out_path,
+        with_tests=with_tests,
+        screensaver_only=screensaver_only,
+        channel_only=channel_only,
     )
     print(f"Wrote {out_path} ({len(included)} files)")
     return out_path
@@ -164,7 +174,11 @@ def cmd_package(args: argparse.Namespace, paths: Paths) -> int:
         print("Static checks failed; run `flightwall check` for details")
         return 1
     _package(
-        paths, with_tests=args.with_tests, screensaver_only=args.screensaver_only, out=args.out
+        paths,
+        with_tests=args.with_tests,
+        screensaver_only=args.screensaver_only,
+        channel_only=args.channel_only,
+        out=args.out,
     )
     return 0
 
@@ -173,7 +187,12 @@ def cmd_deploy(args: argparse.Namespace, paths: Paths, factory: DeviceFactory) -
     if check_channel(paths.roku):
         print("Static checks failed; run `flightwall check` for details")
         return 1
-    archive = _package(paths, with_tests=args.with_tests, screensaver_only=args.screensaver_only)
+    archive = _package(
+        paths,
+        with_tests=args.with_tests,
+        screensaver_only=args.screensaver_only,
+        channel_only=args.channel_only,
+    )
     device = factory(args.host, resolve_password(args.password))
     try:
         status = device.install(archive)
@@ -264,8 +283,9 @@ def cmd_all(args: argparse.Namespace, paths: Paths) -> int:
     code = cmd_check(args, paths)
     if code:
         return code
-    for screensaver_only in (False, True):
-        _package(paths, screensaver_only=screensaver_only)
+    _package(paths)
+    _package(paths, channel_only=True)
+    _package(paths, screensaver_only=True)
     return 0
 
 
@@ -274,6 +294,20 @@ def _add_device_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--password",
         help=f"developer password (or set {PASSWORD_ENV} in .env; prompted otherwise)",
+    )
+
+
+def _add_variant_args(parser: argparse.ArgumentParser) -> None:
+    variant = parser.add_mutually_exclusive_group()
+    variant.add_argument(
+        "--screensaver-only",
+        action="store_true",
+        help="Channel Store screensaver build: no Main()",
+    )
+    variant.add_argument(
+        "--channel-only",
+        action="store_true",
+        help="Channel Store channel build: no screensaver code or manifest attributes",
     )
 
 
@@ -306,17 +340,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("package", help="zip the channel into dist/")
     p.add_argument("--with-tests", action="store_true", help="include the on-device test suite")
-    p.add_argument(
-        "--screensaver-only",
-        action="store_true",
-        help="omit Main() so the package is a screensaver",
-    )
+    _add_variant_args(p)
     p.add_argument("--out", help="output zip path")
 
     p = sub.add_parser("deploy", help="package and side-load onto a Roku in developer mode")
     _add_device_args(p)
     p.add_argument("--with-tests", action="store_true")
-    p.add_argument("--screensaver-only", action="store_true")
+    _add_variant_args(p)
 
     p = sub.add_parser("run-tests", help="side-load the test build and run the on-device tests")
     _add_device_args(p)

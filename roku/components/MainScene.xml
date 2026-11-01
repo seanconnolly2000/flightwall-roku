@@ -3,6 +3,7 @@
   <interface>
     <field id="launchParams" type="assocarray" onChange="onLaunch"/>
     <field id="exitRequested" type="boolean" value="false"/>
+    <field id="memoryStatus" type="assocarray" onChange="onMemoryStatus"/>
   </interface>
   <script type="text/brightscript" uri="pkg:/source/lib/util.brs"/>
   <script type="text/brightscript" uri="pkg:/source/lib/geo.brs"/>

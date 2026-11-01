@@ -19,7 +19,6 @@ function Http_Transfer(cache as Object, url as String) as Object
     transfer.SetMessagePort(CreateObject("roMessagePort"))
     if Left(url, 8) = "https://" then
         transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
-        transfer.InitClientCertificates()
     end if
     transfer.EnableEncodings(true)
     transfer.RetainBodyOnError(true)

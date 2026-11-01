@@ -155,11 +155,15 @@ def make_channel(root: Path) -> Path:
     (roku / "manifest").write_text(
         "title=Test\nmajor_version=1\nminor_version=0\nbuild_version=1\n"
         "mm_icon_focus_hd=pkg:/images/icon_focus_hd.png\n"
-        "splash_screen_hd=pkg:/images/splash_hd.png\n",
+        "splash_screen_hd=pkg:/images/splash_hd.png\n"
+        "screensaver_title=Test\nscreensaver_private=1\n",
         encoding="utf-8",
     )
     (roku / "source" / "main.brs").write_text(
         'sub Main(args as Object)\n    print "hi"\nend sub\n', encoding="utf-8"
+    )
+    (roku / "source" / "screensaver.brs").write_text(
+        'sub RunScreenSaver(args as Object)\n    print "ss"\nend sub\n', encoding="utf-8"
     )
     (roku / "source" / "lib.brs").write_text(
         "function Add(a as Integer, b as Integer) as Integer\n    return a + b\nend function\n",
