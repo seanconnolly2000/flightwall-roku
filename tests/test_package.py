@@ -28,6 +28,13 @@ def test_strip_screensaver_manifest() -> None:
     assert package.strip_screensaver_manifest("title=X") == "title=X\n"
 
 
+def test_screensaver_manifest_drops_title_only() -> None:
+    text = "title=X\nsubtitle=Y\nscreensaver_title=X\nmm_icon_focus_hd=pkg:/i.png\n"
+    assert package.screensaver_manifest(text) == (
+        "subtitle=Y\nscreensaver_title=X\nmm_icon_focus_hd=pkg:/i.png\n"
+    )
+
+
 def test_build_package_requires_manifest(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         package.build_package(tmp_path, tmp_path / "out.zip")
@@ -57,6 +64,11 @@ def test_build_package_variants(channel: Path, tmp_path: Path) -> None:
     assert "source/main.brs" not in saver
     assert "source/screensaver.brs" in saver
     assert "manifest" in saver
+    with zipfile.ZipFile(tmp_path / "s.zip") as zf:
+        saver_manifest = zf.read("manifest").decode()
+        assert "title=Test" not in saver_manifest.replace("screensaver_title=Test", "")
+        assert "screensaver_title=Test" in saver_manifest
+        assert "mm_icon_focus_hd" in saver_manifest
 
     only_channel = package.build_package(channel, tmp_path / "c.zip", channel_only=True)
     assert "source/main.brs" in only_channel

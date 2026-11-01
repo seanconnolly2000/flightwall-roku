@@ -44,19 +44,22 @@ uv run flightwall deploy                          # optional: put the interactiv
 
 ## Which package for which submission
 
-Roku's static analysis treats a **channel** and a **screensaver** as different app types, and
-rejects anything that mixes them: a channel may not contain screensaver entry points or
-`screensaver_*` manifest attributes, and a screensaver may not contain `Main()`. The tooling
-builds a clean package for each:
+**One listing holds one package.** The dashboard has no screensaver type to pick; it works out
+the type from the package itself. A package whose manifest has `screensaver_title` **and no
+`title`** is detected as a screensaver ("package detected as Screensaver" in static analysis);
+anything with `title` is a channel. A channel may not contain screensaver entry points or
+`screensaver_*` attributes, and a screensaver may not contain `Main()`. The tooling builds a
+clean package for each, so to publish both you create **two listings**:
 
-| Dashboard type | Build | Produce the `.pkg` |
+| Listing | Build | Produce the `.pkg` |
 |---|---|---|
-| Channel | `--channel-only` (no screensaver code or manifest lines) | `flightwall deploy --channel-only` then `flightwall sign --out dist/flightwall-channel.pkg` |
-| Screensaver | `--screensaver-only` (no `Main()`) | `flightwall deploy --screensaver-only` then `flightwall sign` |
+| FlightWall (channel) | `--channel-only`: no screensaver code or manifest lines | `flightwall deploy --channel-only` then `flightwall sign --out dist/flightwall-channel.pkg` |
+| FlightWall screensaver | `--screensaver-only`: no `Main()`, no `title` | `flightwall deploy --screensaver-only` then `flightwall sign` |
 
-The default combined build is only for local side-loading. Set the matching type when you create
-the channel in the dashboard; analysing a screensaver package under type "channel" reports
-"Main() or RunUserInterface() function is missing" and three "in-channel screensaver" errors.
+The default combined build (both `title` and `screensaver_title`) is only for local
+side-loading. Uploading the screensaver package while its manifest still had `title` is what
+produced "Channel type is channel but Main() ... is missing" plus three "in-channel screensaver"
+errors.
 
 Other static-analysis requirements already met by the current manifest and code: `rsg_version=1.3`
 with minimum Roku OS 15.1, no `subtitle` attribute, no `InitClientCertificates()`, and the

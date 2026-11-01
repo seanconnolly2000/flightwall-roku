@@ -35,12 +35,23 @@ def should_include(
 
 
 def strip_screensaver_manifest(text: str) -> str:
-    """Remove the screensaver_* attributes from manifest text."""
+    """Remove the screensaver_* attributes from manifest text (channel build)."""
     kept = [
         line
         for line in text.splitlines()
         if not line.strip().startswith(SCREENSAVER_MANIFEST_PREFIX)
     ]
+    return "\n".join(kept).rstrip("\n") + "\n"
+
+
+def screensaver_manifest(text: str) -> str:
+    """Drop the channel `title` attribute (screensaver build).
+
+    Roku's static analysis classifies a package that has both `title` and
+    `screensaver_title` as a channel; a stand-alone screensaver must carry only
+    `screensaver_title`.
+    """
+    kept = [line for line in text.splitlines() if not line.strip().startswith("title=")]
     return "\n".join(kept).rstrip("\n") + "\n"
 
 
@@ -67,6 +78,8 @@ def build_package(
                 continue
             if channel_only and relative == "manifest":
                 zf.writestr(relative, strip_screensaver_manifest(file.read_text(encoding="utf-8")))
+            elif screensaver_only and relative == "manifest":
+                zf.writestr(relative, screensaver_manifest(file.read_text(encoding="utf-8")))
             else:
                 zf.write(file, relative)
             included.append(relative)

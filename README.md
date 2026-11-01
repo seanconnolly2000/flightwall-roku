@@ -240,9 +240,10 @@ uv run flightwall deploy --channel-only                   # channel build: no sc
 uv run flightwall sign --out dist/flightwall-channel.pkg  # -> dist/flightwall-channel.pkg
 ```
 
-Roku treats channels and screensavers as separate app types and its static analysis rejects a
-package that mixes them, so submit each type from its own build. The default (combined) build is
-for local side-loading only.
+Roku treats channels and screensavers as separate app types, each its own Channel Store listing
+with its own package, and its static analysis rejects a package that mixes them. The type is
+read from the manifest: a screensaver has `screensaver_title` and no `title`. Submit each type
+from its own build; the default (combined) build is for local side-loading only.
 
 The signed `.pkg` lands in `dist/`. Upload that file, not the `.zip` (the dashboard rejects
 zips as "incorrectly packaged"); the zips are for side-loading only. Filling in the listing and
