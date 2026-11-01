@@ -134,6 +134,17 @@ does not try to trick it. For an always-on wall display, make FlightWall the **s
 the OS starts it itself after the idle wait time and keeps it up until a button is pressed.
 Use the channel for setup and for watching interactively.
 
+### Texture memory: why the display can go blank on a stick
+
+Streaming sticks have a 100 MB texture pool that is shared with Roku's own home screen, which
+keeps around 70 MB of artwork resident. When that pool is exhausted, SceneGraph silently stops
+drawing new or updated images and text while untouched items stay on screen: the map circle and
+an empty panel remain, everything live disappears. FlightWall therefore keeps its own footprint
+small: no full-HD splash (it stays resident for the life of the app), a half-resolution mask,
+map tiles decoded at no more than 448 px, short trails, and a watchdog that writes "texture
+memory low" to the activity log when a tile fails to load. Running the channel and its
+screensaver at the same time doubles the footprint, so prefer one or the other.
+
 ### If your receiver shows a blue screen (HDMI handshake)
 
 A SceneGraph app cannot renegotiate HDMI; the link drops when the Roku changes output mode or

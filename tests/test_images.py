@@ -95,6 +95,8 @@ def test_ensure_fhd(tmp_path: Path) -> None:
 
 def test_build_images(tmp_path: Path) -> None:
     written = images.build_images(tmp_path / "images")
-    assert len(written) == 36 + 6 + 3 + 3 + len(images.WEATHER_KINDS)
+    assert len(written) == 36 + 6 + len(images.ICON_SIZES) + len(images.SPLASH_SIZES) + len(
+        images.WEATHER_KINDS
+    )
     for name in written:
         assert (tmp_path / "images" / name).exists()

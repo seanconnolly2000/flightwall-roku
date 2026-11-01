@@ -40,8 +40,11 @@ def test_strip_key_handler_scripts() -> None:
     )
 
 
-def test_screensaver_manifest_drops_title_only() -> None:
-    text = "title=X\nsubtitle=Y\nscreensaver_title=X\nmm_icon_focus_hd=pkg:/i.png\n"
+def test_screensaver_manifest_drops_title_and_splash() -> None:
+    text = (
+        "title=X\nsubtitle=Y\nscreensaver_title=X\nmm_icon_focus_hd=pkg:/i.png\n"
+        "splash_screen_hd=pkg:/s.png\nsplash_color=#000000\n"
+    )
     assert package.screensaver_manifest(text) == (
         "subtitle=Y\nscreensaver_title=X\nmm_icon_focus_hd=pkg:/i.png\n"
     )

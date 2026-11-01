@@ -55,14 +55,22 @@ def strip_screensaver_manifest(text: str) -> str:
     return "\n".join(kept).rstrip("\n") + "\n"
 
 
-def screensaver_manifest(text: str) -> str:
-    """Drop the channel `title` attribute (screensaver build).
+SCREENSAVER_DROPPED_PREFIXES = ("title=", "splash_")
 
-    Roku's static analysis classifies a package that has both `title` and
-    `screensaver_title` as a channel; a stand-alone screensaver must carry only
-    `screensaver_title`.
+
+def screensaver_manifest(text: str) -> str:
+    """Manifest for the screensaver build.
+
+    Drops `title` (Roku classifies a package with both `title` and
+    `screensaver_title` as a channel) and the splash screen entries: a splash
+    bitmap stays resident in the device's shared texture memory for the life of
+    the app, and a screensaver has no use for one.
     """
-    kept = [line for line in text.splitlines() if not line.strip().startswith("title=")]
+    kept = [
+        line
+        for line in text.splitlines()
+        if not line.strip().startswith(SCREENSAVER_DROPPED_PREFIXES)
+    ]
     return "\n".join(kept).rstrip("\n") + "\n"
 
 

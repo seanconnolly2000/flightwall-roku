@@ -94,9 +94,12 @@ sub drawTiles()
             poster.translation = [tile.x, tile.y]
             poster.width = tile.w + 1
             poster.height = tile.h + 1
-            poster.loadWidth = tile.w + 1
-            poster.loadHeight = tile.h + 1
+            ' Decode at most 448 px per side: texture memory is a 100 MB pool shared with
+            ' the Roku home screen, and the source tiles are only 512 px anyway.
+            poster.loadWidth = Util_Min(tile.w + 1, 448)
+            poster.loadHeight = Util_Min(tile.h + 1, 448)
             poster.loadDisplayMode = "scaleToFill"
+            poster.observeField("loadStatus", "onTileLoadStatus")
         else if kind = "w" then
             rect = m.tileLayer.createChild("Rectangle")
             rect.color = m.waterColor
@@ -105,6 +108,13 @@ sub drawTiles()
             rect.height = tile.h + 1
         end if
     end for
+end sub
+
+' A tile that fails to load almost always means the device ran out of texture memory.
+sub onTileLoadStatus(event as Object)
+    if event.getData() = "failed" then
+        m.top.warning = "map tile failed to load (texture memory low)"
+    end if
 end sub
 
 function insideMap(pt as Object, margin as Float) as Boolean
@@ -290,7 +300,7 @@ sub updateTrail(hex as String, pt as Object)
         dot.translation = [last.x - 2, last.y - 2]
         dot.blendColor = "0x9CDCFEFF"
         trail.dots.Push(dot)
-        while trail.dots.Count() > 10
+        while trail.dots.Count() > 6
             trail.group.removeChild(trail.dots[0])
             trail.dots.Shift()
         end while

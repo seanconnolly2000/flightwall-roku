@@ -37,6 +37,7 @@ sub init()
     m.clockTimer.observeField("fire", "onClockTimer")
     m.weatherTimer.observeField("fire", "onWeatherTimer")
     m.settingsPanel.observeField("result", "onSettingsResult")
+    m.map.observeField("warning", "onMapWarning")
 
     startClock()
     m.top.setFocus(true)
@@ -155,6 +156,14 @@ end function
 sub logEvent(event as String, detail as String)
     Audit_Append(m.audit, Audit_Now(event, detail))
     if m.diag.visible then m.diag.lines = m.audit
+end sub
+
+sub onMapWarning()
+    text = m.map.warning
+    if text = "" then return
+    ? "[FlightWall] warning: " + text
+    logEvent("warning", text)
+    Audit_Save(m.audit)
 end sub
 
 ' Memory snapshots from the main thread: log warnings always, routine readings only

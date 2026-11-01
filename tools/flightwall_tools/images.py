@@ -10,8 +10,8 @@ from PIL import Image, ImageDraw, ImageFont
 SPRITE_SIZE = 32
 SPRITE_STEP_DEG = 10
 SUPERSAMPLE = 4
-MAP_SIZE = 700
-MAP_RADIUS = 340
+MAP_SIZE = 350  # drawn at half the on-screen size; the Poster scales it to 700
+MAP_RADIUS = 170
 
 WHITE = (255, 255, 255, 255)
 TRANSPARENT = (0, 0, 0, 0)
@@ -48,7 +48,6 @@ ICON_SIZES = {
     "icon_focus_sd.png": (246, 140),
 }
 SPLASH_SIZES = {
-    "splash_fhd.png": (1920, 1080),
     "splash_hd.png": (1280, 720),
     "splash_sd.png": (720, 480),
 }

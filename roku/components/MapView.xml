@@ -8,6 +8,7 @@
     <field id="airports" type="array"/>
     <field id="cities" type="array"/>
     <field id="tiles" type="assocarray"/>
+    <field id="warning" type="string" alwaysNotify="true"/>
   </interface>
   <script type="text/brightscript" uri="pkg:/source/lib/util.brs"/>
   <script type="text/brightscript" uri="pkg:/source/lib/geo.brs"/>

@@ -105,6 +105,12 @@ streaming stick from its wall adapter rather than a TV or receiver USB port, tur
 System > Power > Auto power savings, set Display type to a fixed resolution, and turn off
 Auto-adjust display refresh rate.
 
+**Everything disappears except the circle and an empty panel.** The Roku ran out of the texture
+memory it shares with its home screen, so it stopped drawing updates. Press a button to leave the
+screensaver and start it again; the activity log (Play, in the channel) will show "texture memory
+low". Avoid running the FlightWall channel and the FlightWall screensaver at the same time, and
+keep the radius at 50 miles or less on a streaming stick.
+
 **Forecast missing.** The forecast loads a few seconds after the first aircraft and refreshes
 hourly; if the weather service is unreachable it retries every ten minutes.
 
