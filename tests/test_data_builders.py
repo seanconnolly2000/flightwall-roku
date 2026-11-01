@@ -4,8 +4,48 @@ import json
 from pathlib import Path
 from typing import Any
 
-from conftest import AIRPORTS_CSV, GAZETTEER_TXT
-from flightwall_tools import airports, cities, zips
+from conftest import AIRLINES_DAT, AIRPORTS_CSV, GAZETTEER_TXT
+from flightwall_tools import airlines, airports, cities, zips
+
+
+def test_parse_openflights_prefers_active_codes() -> None:
+    names = airlines.parse_openflights(AIRLINES_DAT)
+    assert names["CKK"] == "China Cargo Airlines"
+    assert names["CSN"] == "China Southern Airlines"
+    assert names["DUP"] == "New Code Holder"
+    assert names["SPC"] == "Spaced Name"
+    assert "N/A" not in names
+    assert "GNL" in names
+
+
+def test_parse_overrides() -> None:
+    text = "# comment\n\nCSG,China Southern Cargo\nbad line\nxx,Too Short\nnje , NetJets  Europe \n"
+    assert airlines.parse_overrides(text) == {
+        "CSG": "China Southern Cargo",
+        "NJE": "NetJets Europe",
+    }
+    assert airlines.OVERRIDES_PATH.exists()
+    assert "CSG" in airlines.parse_overrides(airlines.OVERRIDES_PATH.read_text(encoding="utf-8"))
+
+
+def test_render_and_build_airlines(tmp_path: Path) -> None:
+    assert airlines.render_airline_table({"CKK": "China Cargo Airlines", "ABC": "Abc Air"}) == (
+        "\nABC,Abc Air\nCKK,China Cargo Airlines\n"
+    )
+    dat = tmp_path / "airlines.dat"
+    dat.write_text(AIRLINES_DAT, encoding="utf-8")
+    overrides = tmp_path / "overrides.csv"
+    overrides.write_text(
+        "CKK,China Cargo Airlines Ltd\nCSG,China Southern Cargo\n", encoding="utf-8"
+    )
+    out = tmp_path / "data" / "airlines.txt"
+    count = airlines.build_airlines(dat, out, overrides)
+    table = out.read_text(encoding="utf-8")
+    assert table.startswith("\n")
+    assert "\nCKK,China Cargo Airlines Ltd\n" in table
+    assert "\nCSG,China Southern Cargo\n" in table
+    assert count == table.count("\n") - 1
+    assert airlines.build_airlines(dat, tmp_path / "plain.txt", tmp_path / "missing.csv") == 5
 
 
 def test_parse_gazetteer_filters_and_sorts() -> None:

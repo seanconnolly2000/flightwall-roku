@@ -58,6 +58,13 @@ sub FlightWall_RunTests(args as Object)
         Test_Weather_ParseSample
         Test_Weather_ParseErrors
         Test_Http_Host
+        Test_Operators_PrefixAndTable
+        Test_Operators_OrganizationAndCase
+        Test_Operators_MilitaryHex
+        Test_Operators_ResolvePriority
+        Test_Operators_Model
+        Test_Operators_ParseLookups
+        Test_Operators_PickAndTrim
     ])
     if args.IncludeFilter <> invalid then runner.SetIncludeFilter(args.IncludeFilter)
     if args.ExcludeFilter <> invalid then runner.SetExcludeFilter(args.ExcludeFilter)

@@ -120,6 +120,19 @@ AIRPORTS_CSV = (
     '"US-KS","Leoti","no",,,"00AA","00AA",,,\n'
 )
 
+AIRLINES_DAT = (
+    '-1,"Unknown",\\N,"-","N/A",\\N,\\N,"Y"\n'
+    '2,"135 Airways",\\N,"","GNL","GENERAL","United States","N"\n'
+    '1757,"China Cargo Airlines",\\N,"CK","CKK","CARGO KING","China","N"\n'
+    '1767,"China Southern Airlines",\\N,"CZ","CSN","CHINA SOUTHERN","China","Y"\n'
+    '9001,"Old Code Holder",\\N,"","DUP","OLD","Nowhere","N"\n'
+    '9002,"New Code Holder",\\N,"","DUP","NEW","Nowhere","Y"\n'
+    '9003,"Later Inactive",\\N,"","DUP","LATER","Nowhere","N"\n'
+    '9004,"Bad Row"\n'
+    '9005,"No ICAO",\\N,"",\\N,"NONE","Nowhere","Y"\n'
+    '9006,"  Spaced   Name ",\\N,"","SPC","SPACED","Nowhere","Y"\n'
+)
+
 GAZETTEER_TXT = (
     "GEOID\tALAND\tAWATER\tALAND_SQMI\tAWATER_SQMI\tINTPTLAT\tINTPTLONG                 \n"
     "94110\t1\t2\t3\t4\t37.748495\t-122.415291                 \n"
@@ -217,6 +230,7 @@ def fake_sources(
         json.dumps(places), encoding="utf-8"
     )
     (cache / "airports.csv").write_text(AIRPORTS_CSV, encoding="utf-8")
+    (cache / "airlines.dat").write_text(AIRLINES_DAT, encoding="utf-8")
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w") as zf:
         zf.writestr("2023_Gaz_zcta_national.txt", GAZETTEER_TXT)

@@ -1,0 +1,4 @@
+# ICAO airline codes missing from or wrong in OpenFlights. One `ICAO,Name` per line.
+CSG,China Southern Cargo
+NJE,NetJets Europe
+EJA,NetJets

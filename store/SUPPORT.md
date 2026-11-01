@@ -59,7 +59,7 @@ Any button press ends the screensaver, as with every Roku screensaver.
 |---|---|---|
 | ZIP code | Centre of the map and location for the forecast | none |
 | Radius | How far out aircraft are shown, 10 to 250 miles (Up/Down on the main screen also changes it) | 50 miles |
-| Data source | adsb.lol, adsb.fi or OpenSky Network for aircraft positions | adsb.lol |
+| Data source | adsb.fi, adsb.lol or OpenSky Network for aircraft positions (adsb.fi also supplies owner and aircraft type) | adsb.fi |
 | OpenSky client ID / secret | Optional free OpenSky account credentials for a higher daily limit (opensky-network.org > Account > API client) | not set |
 | Poll every | Refresh interval, 10 to 60 seconds | 10 seconds |
 | Route and airline lookups | Origin, destination, airline name and logo per flight | on |
@@ -67,6 +67,7 @@ Any button press ends the screensaver, as with every Roku screensaver.
 | Flight labels and airline logos | Callsign, route and logo next to each aircraft | on |
 | Trails and origin lines | Breadcrumb trail and a faint line toward where a flight came from | on |
 | Hide aircraft on the ground | Leaves out taxiing traffic that otherwise piles up on airports | on |
+| Private aircraft owners | Whether a privately owned plane shows its registered owner's name or just "Private owner" (companies, agencies and airlines are always named) | Private owner |
 
 **Main-screen keys:** `*` or OK opens settings, **Play** shows the activity log (every data
 request and its result), **Up/Down** changes the radius, **Back** exits.

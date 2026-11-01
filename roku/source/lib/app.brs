@@ -2,11 +2,12 @@
 
 ' Builds the scene's launch parameters from the OS launch args.
 function FlightWall_LaunchParams(args as Object, screensaver as Boolean) as Object
-    params = { screensaver: screensaver, zip: "", radius: "", poll: "" }
+    params = { screensaver: screensaver, zip: "", radius: "", poll: "", provider: "" }
     if Util_IsAA(args) then
         if Util_IsString(args.zip) then params.zip = args.zip
         if Util_IsString(args.radius) then params.radius = args.radius
         if Util_IsString(args.poll) then params.poll = args.poll
+        if Util_IsString(args.provider) then params.provider = args.provider
     end if
     return params
 end function

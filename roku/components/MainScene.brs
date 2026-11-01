@@ -17,6 +17,8 @@ sub init()
     m.settings = Settings_Load()
     m.audit = Audit_Load()
     m.routes = {}
+    m.owners = {}
+    m.airlines = {}
     m.aircraft = []
     m.strikes = 0
     m.busy = false
@@ -140,6 +142,13 @@ sub applyLaunchParams(params as Object)
     poll = Util_Str(params.poll)
     if poll <> "" and Util_ToInt(poll, 0) >= 5 and Util_ToInt(poll, 0) <= 600 then
         m.settings.pollSeconds = Util_ToInt(poll, 10).ToStr()
+        changed = true
+    end if
+    source = LCase(Util_Str(params.provider))
+    if source <> "" and Settings_IsProvider(source) and source <> Util_Str(m.settings.provider) then
+        m.settings.provider = source
+        m.token = ""
+        m.tokenExpiry = 0
         changed = true
     end if
     if changed then
@@ -278,7 +287,13 @@ sub poll()
     radius = Settings_Radius(m.settings)
     provider = Util_Str(m.settings.provider)
     lookups = []
-    if Settings_Flag(m.settings, "routes") then lookups = Routes_Pick(m.aircraft, m.routes, 2)
+    ownerLookups = []
+    airlineLookups = []
+    if Settings_Flag(m.settings, "routes") then
+        lookups = Routes_Pick(m.aircraft, m.routes, 1)
+        ownerLookups = Operators_PickOwnerLookups(m.aircraft, m.routes, m.airlines, m.owners, 1)
+        airlineLookups = Operators_PickAirlineLookups(m.aircraft, m.routes, m.airlines, 1)
+    end if
     m.flightTask.request = {
         provider: provider
         url: Flights_ProviderUrl(provider, lat, lon, radius)
@@ -290,6 +305,8 @@ sub poll()
         token: m.token
         tokenExpiry: m.tokenExpiry
         routeLookups: lookups
+        ownerLookups: ownerLookups
+        airlineLookups: airlineLookups
     }
     m.busy = true
     m.flightTask.control = "RUN"
@@ -313,8 +330,22 @@ sub onFlightResult()
                 m.routes[callsign] = result.routes[callsign]
             end for
         end if
+        if Util_IsAA(result.owners) then
+            for each hex in result.owners
+                m.owners[hex] = result.owners[hex]
+            end for
+        end if
+        if Util_IsAA(result.airlines) then
+            for each prefix in result.airlines
+                m.airlines[prefix] = result.airlines[prefix]
+            end for
+        end if
+        Operators_TrimCache(m.routes, 500)
+        Operators_TrimCache(m.owners, 300)
+        Operators_TrimCache(m.airlines, 300)
         m.credits = Util_ToInt(result.credits, -1)
         displayRoutes = reconcileRoutes(m.aircraft)
+        decorateAircraft(m.aircraft, displayRoutes)
         m.map.routes = displayRoutes
         m.map.aircraft = m.aircraft
         m.panel.routes = displayRoutes
@@ -351,6 +382,23 @@ sub onFlightResult()
     }
     ' Persist the log rarely: registry writes hit flash. Errors and every ten minutes.
     if (m.pollCount MOD 60 = 0) or not result.ok then Audit_Save(m.audit)
+end sub
+
+' Fills operatorName/operatorKind/modelName on each aircraft from the route, the bundled
+' and looked-up airline names, the registry owner, and the viewer's owner-name setting.
+sub decorateAircraft(aircraft as Object, displayRoutes as Object)
+    showNames = Settings_Flag(m.settings, "ownerNames")
+    for each ac in aircraft
+        route = displayRoutes[Util_Str(ac.callsign)]
+        airline = ""
+        prefix = Operators_Prefix(Util_Str(ac.callsign))
+        if prefix <> "" then airline = Util_Str(m.airlines[prefix])
+        owner = m.owners[Util_Str(ac.hex)]
+        resolved = Operators_Resolve(ac, route, airline, owner, showNames)
+        ac.operatorName = resolved.name
+        ac.operatorKind = resolved.kind
+        ac.modelName = Operators_Model(ac, owner)
+    end for
 end sub
 
 ' Routes are cached per callsign; check each one against the aircraft that carries it.

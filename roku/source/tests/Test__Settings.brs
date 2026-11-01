@@ -5,7 +5,9 @@
 sub Test_Settings_DefaultsAndLoad()
     defaults = Settings_Defaults()
     UTF_assertEqual(defaults.radius, "50")
-    UTF_assertEqual(defaults.provider, "adsblol")
+    UTF_assertEqual(defaults.provider, "adsbfi")
+    UTF_assertTrue(Settings_IsProvider("adsblol"))
+    UTF_assertFalse(Settings_IsProvider("flightaware"))
     UTF_assertEqual(defaults.pollSeconds, "10")
     loaded = Settings_Load()
     UTF_assertAAHasKeys(loaded, ["zip", "lat", "lon", "radius", "provider", "pollSeconds", "openskyClientId", "openskyClientSecret"])
@@ -29,9 +31,9 @@ sub Test_Settings_NextValueCycles()
     UTF_assertEqual(Settings_NextValue(options, "10", -1), "50")
     UTF_assertEqual(Settings_NextValue(options, "7", 1), "10")
     UTF_assertEqual(Settings_NextValue([], "7", 1), "7")
-    UTF_assertEqual(Settings_NextProvider("adsblol", 1), "adsbfi")
-    UTF_assertEqual(Settings_NextProvider("opensky", 1), "adsblol")
-    UTF_assertEqual(Settings_NextProvider("adsblol", -1), "opensky")
+    UTF_assertEqual(Settings_NextProvider("adsbfi", 1), "adsblol")
+    UTF_assertEqual(Settings_NextProvider("opensky", 1), "adsbfi")
+    UTF_assertEqual(Settings_NextProvider("adsbfi", -1), "opensky")
 end sub
 
 ' @Test

@@ -46,6 +46,12 @@ SOURCES: dict[str, Source] = {
         "airports.csv",
         "Public domain (unlicense)",
     ),
+    "airlines": Source(
+        "OpenFlights airlines.dat",
+        "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat",
+        "airlines.dat",
+        "Open Database License (ODbL)",
+    ),
     "zcta": Source(
         "US Census Bureau 2023 ZCTA gazetteer",
         "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2023_Gazetteer/"

@@ -12,7 +12,7 @@ function Settings_Defaults() as Object
         lon: ""
         place: ""
         radius: "50"
-        provider: "adsblol"
+        provider: "adsbfi"
         pollSeconds: "10"
         openskyClientId: ""
         openskyClientSecret: ""
@@ -21,6 +21,7 @@ function Settings_Defaults() as Object
         planeLabels: "1"
         trails: "1"
         hideGround: "1"
+        ownerNames: "0"
     }
 end function
 
@@ -51,8 +52,8 @@ end function
 
 function Settings_Providers() as Object
     return [
+        { id: "adsbfi", name: "adsb.fi (free, no key, includes owners)" }
         { id: "adsblol", name: "adsb.lol (free, no key)" }
-        { id: "adsbfi", name: "adsb.fi (free, no key)" }
         { id: "opensky", name: "OpenSky Network" }
     ]
 end function
@@ -84,6 +85,13 @@ function Settings_NextProvider(current as String, delta as Integer) as String
         ids.Push(provider.id)
     end for
     return Settings_NextValue(ids, current, delta)
+end function
+
+function Settings_IsProvider(id as String) as Boolean
+    for each provider in Settings_Providers()
+        if provider.id = id then return true
+    end for
+    return false
 end function
 
 function Settings_IsZipValid(zip as String) as Boolean

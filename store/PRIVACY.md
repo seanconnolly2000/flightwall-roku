@@ -24,7 +24,13 @@ connection, as with any web request.
 
 - adsb.lol, adsb.fi or OpenSky Network (your choice): aircraft positions around your coordinates.
   If you enter OpenSky credentials, they are sent only to OpenSky's login server to obtain a token.
-- adsbdb.com: route and airline details for a flight's callsign.
+- adsbdb.com: route and airline details for a flight's callsign, and the public aircraft
+  registry entry (registered owner, model) for an aircraft's ICAO address.
+
+Aircraft registry data (for example the FAA registry) is public record and may name an
+individual as the registered owner of a private aircraft. FlightWall shows such entries as
+"Private owner" by default; a setting lets the viewer display the registered name instead.
+Companies, agencies and airlines are always shown by name.
 - images.kiwi.com: airline logo images by airline code.
 - api.open-meteo.com: a five-day forecast for your coordinates.
 

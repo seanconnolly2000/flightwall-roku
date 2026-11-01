@@ -21,6 +21,12 @@ function Flights_Blank() as Object
         category: ""
         distMi: 0.0
         bearing: 0.0
+        ownOp: ""
+        desc: ""
+        airlineName: ""
+        operatorName: ""
+        operatorKind: ""
+        modelName: ""
     }
 end function
 
@@ -108,6 +114,8 @@ function Flights_FromAdsb(raw as Object) as Object
     end if
     ac.squawk = Util_Str(raw.squawk)
     ac.category = Util_Str(raw.category)
+    ac.ownOp = Util_Str(raw.ownOp)
+    ac.desc = Util_Str(raw.desc)
     return ac
 end function
 

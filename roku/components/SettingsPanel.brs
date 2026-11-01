@@ -56,6 +56,11 @@ function valueOrNotSet(value as String) as String
     return value
 end function
 
+function ownerNamesLabel(value as String) as String
+    if value = "1" then return "show registered names"
+    return "show as Private owner"
+end function
+
 function buildRows() as Object
     s = m.working
     secretState = "not set"
@@ -72,6 +77,7 @@ function buildRows() as Object
         { key: "planeLabels", label: "Flight labels and airline logos", value: Settings_OnOff(Util_Str(s.planeLabels)) }
         { key: "trails", label: "Trails and origin lines", value: Settings_OnOff(Util_Str(s.trails)) }
         { key: "hideGround", label: "Hide aircraft on the ground", value: Settings_OnOff(Util_Str(s.hideGround)) }
+        { key: "ownerNames", label: "Private aircraft owners", value: ownerNamesLabel(Util_Str(s.ownerNames)) }
         { key: "save", label: "Save and apply", value: "" }
         { key: "cancel", label: "Cancel", value: "" }
     ]
@@ -108,7 +114,7 @@ sub onItemSelected()
         m.working.pollSeconds = Settings_NextValue(Settings_PollOptions(), Util_Str(m.working.pollSeconds), 1)
     else if key = "provider" then
         m.working.provider = Settings_NextProvider(Util_Str(m.working.provider), 1)
-    else if key = "routes" or key = "cityLabels" or key = "planeLabels" or key = "trails" or key = "hideGround" then
+    else if key = "routes" or key = "cityLabels" or key = "planeLabels" or key = "trails" or key = "hideGround" or key = "ownerNames" then
         m.working[key] = Settings_Toggle(Util_Str(m.working[key]))
     else if key = "save" then
         save()

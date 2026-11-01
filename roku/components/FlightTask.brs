@@ -1,10 +1,11 @@
-' One poll of the flight data provider plus a couple of route lookups.
-' Runs on the Task thread; every network call lives here and nowhere else.
-' HTTP connections are kept alive between polls (see source/lib/http.brs).
+' One poll of the flight data provider plus a few small enrichment lookups
+' (routes, registry owners, airline names). Runs on the Task thread; every network
+' call lives here and nowhere else. HTTP connections are kept alive between polls.
 
 sub init()
     m.top.functionName = "runTask"
     m.http = {}
+    m.airlineTable = invalid
 end sub
 
 sub runTask()
@@ -17,6 +18,8 @@ sub runTask()
         message: ""
         aircraft: []
         routes: {}
+        owners: {}
+        airlines: {}
         credits: -1
         token: ""
         tokenExpiry: 0
@@ -66,11 +69,13 @@ sub runTask()
     if classified.kind = "ok" then
         result.ok = true
         result.aircraft = Flights_Parse(result.provider, response.body, Util_ToFloat(req.lat), Util_ToFloat(req.lon), Util_ToFloat(req.radius, 50))
+        Task_ApplyAirlineTable(result.aircraft)
         result.credits = Http_HeaderInt(response.headers, "x-rate-limit-remaining")
+        lookupHeaders = { "User-Agent": "FlightWall-Roku/1.0", "Accept": "application/json" }
         lookups = req.routeLookups
         if Util_IsArray(lookups) then
             for each callsign in lookups
-                routeResponse = Http_Request(m.http, "GET", Routes_Url(callsign), { "User-Agent": "FlightWall-Roku/1.0", "Accept": "application/json" }, "", 8000)
+                routeResponse = Http_Request(m.http, "GET", Routes_Url(callsign), lookupHeaders, "", 8000)
                 if routeResponse.status = 200 then
                     result.routes[callsign] = Routes_Parse(routeResponse.body)
                 else if routeResponse.status = 404 then
@@ -78,9 +83,36 @@ sub runTask()
                 end if
             end for
         end if
+        owners = req.ownerLookups
+        if Util_IsArray(owners) then
+            for each hex in owners
+                ownerResponse = Http_Request(m.http, "GET", Operators_AircraftUrl(hex), lookupHeaders, "", 8000)
+                if ownerResponse.status = 200 or ownerResponse.status = 404 then
+                    result.owners[hex] = Operators_ParseAircraft(ownerResponse.body)
+                end if
+            end for
+        end if
+        airlines = req.airlineLookups
+        if Util_IsArray(airlines) then
+            for each prefix in airlines
+                airlineResponse = Http_Request(m.http, "GET", Operators_AirlineUrl(prefix), lookupHeaders, "", 8000)
+                if airlineResponse.status = 200 or airlineResponse.status = 404 then
+                    result.airlines[prefix] = Operators_ParseAirline(airlineResponse.body)
+                end if
+            end for
+        end if
     end if
     result.elapsedMs = timer.TotalMilliseconds()
     m.top.result = result
+end sub
+
+' Fills ac.airlineName from the bundled ICAO airline table (no network).
+sub Task_ApplyAirlineTable(aircraft as Object)
+    if m.airlineTable = invalid then m.airlineTable = ReadAsciiFile("pkg:/data/airlines.txt")
+    for each ac in aircraft
+        prefix = Operators_Prefix(ac.callsign)
+        if prefix <> "" then ac.airlineName = Operators_TableLookup(m.airlineTable, prefix)
+    end for
 end sub
 
 ' OAuth2 client-credentials token for a free OpenSky account.

@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from . import __version__
+from .airlines import build_airlines
 from .airports import build_airports
 from .brscheck import check_channel
 from .cities import DEFAULT_MIN_POPULATION, build_cities
@@ -109,6 +110,9 @@ def cmd_build_data(args: argparse.Namespace, paths: Paths) -> int:
     print("Building city labels")
     n_cities = build_cities(files["places"], data_dir / "cities.json", args.min_population)
     print(f"  {n_cities} cities")
+    print("Building airline code table")
+    n_airlines = build_airlines(files["airlines"], data_dir / "airlines.txt")
+    print(f"  {n_airlines} airline codes")
     print("Rasterizing map tiles (this takes a few minutes)")
     land = json.loads(files["land"].read_text(encoding="utf-8"))
     lakes = json.loads(files["lakes"].read_text(encoding="utf-8"))

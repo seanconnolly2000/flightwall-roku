@@ -34,7 +34,8 @@ Everything is keyless and free by default. Data sources:
 | What | Source | Notes |
 |---|---|---|
 | Aircraft positions | [adsb.lol](https://api.adsb.lol/docs) (default), [adsb.fi](https://github.com/adsbfi/opendata), [OpenSky Network](https://openskynetwork.github.io/opensky-api/) | OpenSky anonymous access is ~400 credits/day; a free account (OAuth2 client credentials) raises it to 4000+ |
-| Routes and airlines | [adsbdb.com](https://www.adsbdb.com/) | At most 3 new callsign lookups per poll, cached for the session |
+| Routes and airlines | [adsbdb.com](https://www.adsbdb.com/) | One new callsign route lookup per poll, cached for the session |
+| Operators | adsb.fi `ownOp`/`desc` fields, bundled [OpenFlights](https://openflights.org/data) airline codes, [adsbdb.com](https://www.adsbdb.com/) aircraft and airline lookups | Registry owner, aircraft model and airline name; at most one owner and one airline lookup per poll, caches capped at a few hundred entries |
 | Airline logos | `images.kiwi.com/airlines/64/{IATA}.png` | Same public CDN OpenFlightWall uses |
 | Five-day forecast | [Open-Meteo](https://open-meteo.com/) | Free, keyless; refreshed hourly; attribution shown on screen |
 | Coastlines, lakes, cities | [Natural Earth](https://www.naturalearthdata.com/) 1:10m (public domain) | Rasterized into 1-degree tiles |
@@ -89,17 +90,23 @@ You can also set the ZIP and radius from your PC through the Roku's External Con
 Protocol, which saves them exactly as if typed on the TV:
 
 ```bash
-curl -d "" "http://<roku-ip>:8060/launch/dev?zip=94110&radius=50&poll=20"
+curl -d "" "http://<roku-ip>:8060/launch/dev?zip=94110&radius=50&poll=20&provider=adsbfi"
 ```
 
-(`poll` is the refresh interval in seconds, 5 to 600; all three parameters are optional.)
+(`poll` is the refresh interval in seconds, 5 to 600; `provider` is adsbfi, adsblol or opensky; all parameters are optional.)
 
 To see what the TV is showing without walking over: `uv run flightwall screenshot --host <ip>`
 writes `dist/screenshot.jpg` using the installer's screenshot utility.
 
 Settings also include the data source, OpenSky credentials, poll interval, route lookups,
-city labels, flight labels and logos, trails and origin lines, and **Hide aircraft on the
-ground** (on by default; taxiing traffic otherwise piles up on airports).
+city labels, flight labels and logos, trails and origin lines, **Hide aircraft on the
+ground** (on by default; taxiing traffic otherwise piles up on airports) and **Private
+aircraft owners**. Operators are resolved in this order: the airline behind the callsign
+(route database, then the bundled OpenFlights code table, then an adsbdb airline lookup), the
+registered owner from the FAA/registry data that adsb.fi includes or an adsbdb aircraft lookup,
+and finally the ICAO hex range (AE0000 to AFFFFF reads "US military"). Registry owners that look
+like organizations are shown as such; private individuals appear as "Private owner" unless the
+setting is switched to show registered names.
 
 Remote keys on the main screen:
 
@@ -285,7 +292,8 @@ Data and services, with their terms:
 | [US Census Bureau](https://www.census.gov/geo/maps-data/data/gazetteer-files.html) ZIP centroids | US government work, public domain |
 | [adsb.lol](https://github.com/adsblol/api), [adsb.fi](https://github.com/adsbfi/opendata) aircraft positions | Community-run, free, dynamic rate limits |
 | [OpenSky Network](https://opensky-network.org/about/terms-of-use) aircraft positions | Free for non-commercial use under OpenSky's terms |
-| [adsbdb.com](https://www.adsbdb.com/) routes and airlines | Community-run, free |
+| [adsbdb.com](https://www.adsbdb.com/) routes, airlines, aircraft registry | Community-run, free |
+| [OpenFlights](https://openflights.org/data) airline codes (`roku/data/airlines.txt`, plus `tools/flightwall_tools/data/airline_overrides.csv`) | Open Database License (ODbL) |
 | [Open-Meteo](https://open-meteo.com/en/terms) forecasts | CC BY 4.0; attribution shown on screen |
 | Airline logos via `images.kiwi.com` | Public CDN; logos remain trademarks of their airlines |
 

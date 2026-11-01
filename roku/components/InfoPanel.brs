@@ -219,11 +219,13 @@ sub refresh()
     nearest = aircraft[0]
     route = routes[Util_Str(nearest.callsign)]
     setText(m.heroCallsign, Flights_DisplayName(nearest))
-    airline = ""
-    if route <> invalid then airline = Util_Str(route.airlineName)
-    if airline = "" then airline = "Unknown operator"
-    setText(m.heroAirline, airline)
-    setText(m.heroType, Format_AircraftType(nearest))
+    operator = Util_Str(nearest.operatorName)
+    if operator = "" and route <> invalid then operator = Util_Str(route.airlineName)
+    if operator = "" then operator = "Unknown operator"
+    setText(m.heroAirline, operator)
+    model = Util_Str(nearest.modelName)
+    if model = "" then model = Format_AircraftType(nearest)
+    setText(m.heroType, model)
     logoUrl = ""
     if route <> invalid then logoUrl = Routes_LogoUrl(Util_Str(route.airlineIata))
     if logoUrl <> "" then

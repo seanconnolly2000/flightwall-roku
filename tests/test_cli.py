@@ -112,6 +112,7 @@ def test_build_data_and_images(project: Path, capsys: pytest.CaptureFixture[str]
     assert data.joinpath("zips.txt").read_text().startswith("\n00601,")
     assert len(json.loads(data.joinpath("airports.json").read_text())["airports"]) == 3
     assert json.loads(data.joinpath("cities.json").read_text())["cities"][0]["n"] == "Bigcity"
+    assert "\nCKK,China Cargo Airlines\n" in data.joinpath("airlines.txt").read_text()
     index = json.loads((project / "roku" / "images" / "tiles" / "index.json").read_text())
     assert index["px_per_deg"] == 2
     assert len(index["tiles"]) == 26 * 59
