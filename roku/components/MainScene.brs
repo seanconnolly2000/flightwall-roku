@@ -279,9 +279,10 @@ sub onFlightResult()
             end for
         end if
         m.credits = Util_ToInt(result.credits, -1)
-        m.map.routes = m.routes
+        displayRoutes = reconcileRoutes(m.aircraft)
+        m.map.routes = displayRoutes
         m.map.aircraft = m.aircraft
-        m.panel.routes = m.routes
+        m.panel.routes = displayRoutes
         m.panel.aircraft = m.aircraft
         m.panel.banner = ""
         normal = Settings_PollSeconds(m.settings)
@@ -316,6 +317,18 @@ sub onFlightResult()
     ' Persist the log rarely: registry writes hit flash. Errors and every ten minutes.
     if (m.pollCount MOD 60 = 0) or not result.ok then Audit_Save(m.audit)
 end sub
+
+' Routes are cached per callsign; check each one against the aircraft that carries it.
+function reconcileRoutes(aircraft as Object) as Object
+    display = {}
+    for each ac in aircraft
+        callsign = Util_Str(ac.callsign)
+        if callsign <> "" and m.routes.DoesExist(callsign) then
+            display[callsign] = Routes_Reconcile(m.routes[callsign], ac)
+        end if
+    end for
+    return display
+end function
 
 function describeError(result as Object, providerName as String, backoff as Integer) as String
     kind = Util_Str(result.kind)

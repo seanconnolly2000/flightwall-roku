@@ -107,6 +107,66 @@ function Routes_CityLabel(route as Object) as String
     return origin + " to " + dest
 end function
 
+function Routes_HasBothEnds(route as Object) as Boolean
+    if route = invalid or not route.found then return false
+    if route.originLat = 0 and route.originLon = 0 then return false
+    return not (route.destLat = 0 and route.destLon = 0)
+end function
+
+' Returns a copy of the route with origin and destination exchanged.
+function Routes_Swap(route as Object) as Object
+    out = Util_CopyAA(route)
+    out.originIata = route.destIata
+    out.originCity = route.destCity
+    out.originLat = route.destLat
+    out.originLon = route.destLon
+    out.destIata = route.originIata
+    out.destCity = route.originCity
+    out.destLat = route.originLat
+    out.destLon = route.originLon
+    return out
+end function
+
+' Checks a looked-up route against where the aircraft actually is and where it is
+' going. Flight numbers are reused across legs and days, so the database answer
+' can be stale (a BOS-JFK leg for a plane over California) or reversed (KOA-OAK
+' for a plane climbing out of Oakland toward Hawaii). Returns a copy that is
+' corrected, or marked not found (airline details are kept) when it cannot fit.
+function Routes_Reconcile(route as Object, ac as Object) as Object
+    if not Routes_HasBothEnds(route) then return route
+    out = Util_CopyAA(route)
+    lat = Util_ToFloat(ac.lat)
+    lon = Util_ToFloat(ac.lon)
+    toOrigin = Geo_Haversine(lat, lon, route.originLat, route.originLon)
+    toDest = Geo_Haversine(lat, lon, route.destLat, route.destLon)
+    total = Geo_Haversine(route.originLat, route.originLon, route.destLat, route.destLon)
+    if toOrigin + toDest > total * 1.25 + 100 then
+        out.found = false
+        out.rejected = true
+        return out
+    end if
+    vrate = Util_ToInt(ac.vrate)
+    track = Util_ToFloat(ac.track, -1)
+    swap = false
+    if vrate > 500 and toDest < 40 and toOrigin > 150 then
+        swap = true
+    else if vrate < -500 and toOrigin < 40 and toDest > 150 then
+        swap = true
+    else if track >= 0 and toOrigin > 40 and toDest > 40 then
+        awayFromDest = Geo_AngleDiff(track, Geo_Bearing(lat, lon, route.destLat, route.destLon)) > 110
+        towardOrigin = Geo_AngleDiff(track, Geo_Bearing(lat, lon, route.originLat, route.originLon)) < 70
+        if awayFromDest and towardOrigin then
+            swap = true
+        else if awayFromDest then
+            out.found = false
+            out.rejected = true
+            return out
+        end if
+    end if
+    if swap then return Routes_Swap(out)
+    return out
+end function
+
 ' Picks up to maxCount callsigns (nearest first) that still need a route lookup.
 function Routes_Pick(aircraft as Object, cache as Object, maxCount as Integer) as Object
     picks = []

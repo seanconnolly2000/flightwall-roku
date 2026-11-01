@@ -53,6 +53,19 @@ function Geo_Bearing(lat1 as Float, lon1 as Float, lat2 as Float, lon2 as Float)
     return bearing
 end function
 
+' Smallest angle between two bearings, 0..180 degrees.
+function Geo_AngleDiff(a as Float, b as Float) as Float
+    diff = a - b
+    while diff < -180
+        diff = diff + 360
+    end while
+    while diff > 180
+        diff = diff - 360
+    end while
+    if diff < 0 then diff = -diff
+    return diff
+end function
+
 function Geo_Compass(bearing as Float) as String
     names = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
     index = Int((bearing + 22.5) / 45.0) MOD 8

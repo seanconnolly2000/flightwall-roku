@@ -32,6 +32,15 @@ sub Test_Geo_Atan2Quadrants()
 end sub
 
 ' @Test
+sub Test_Geo_AngleDiff()
+    UTF_assertTrue(Geo_Near(Geo_AngleDiff(10, 350), 20, 0.001))
+    UTF_assertTrue(Geo_Near(Geo_AngleDiff(350, 10), 20, 0.001))
+    UTF_assertTrue(Geo_Near(Geo_AngleDiff(90, 270), 180, 0.001))
+    UTF_assertTrue(Geo_Near(Geo_AngleDiff(45, 45), 0, 0.001))
+    UTF_assertTrue(Geo_Near(Geo_AngleDiff(0, 540), 180, 0.001))
+end sub
+
+' @Test
 sub Test_Geo_Compass()
     UTF_assertEqual(Geo_Compass(0), "N")
     UTF_assertEqual(Geo_Compass(44), "NE")

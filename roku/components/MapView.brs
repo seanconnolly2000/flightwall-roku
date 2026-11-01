@@ -253,7 +253,7 @@ sub updatePlane(plane as Object, ac as Object, pt as Object, route as Object)
         setText(plane.route, routeText)
         plane.route.visible = routeText <> ""
         logoUrl = ""
-        if route <> invalid and route.found then logoUrl = Routes_LogoUrl(route.airlineIata)
+        if route <> invalid then logoUrl = Routes_LogoUrl(Util_Str(route.airlineIata))
         if logoUrl <> "" then
             setUri(plane.logo, logoUrl)
             plane.logo.visible = true

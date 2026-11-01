@@ -225,7 +225,7 @@ sub refresh()
     setText(m.heroAirline, airline)
     setText(m.heroType, Format_AircraftType(nearest))
     logoUrl = ""
-    if route <> invalid and route.found then logoUrl = Routes_LogoUrl(route.airlineIata)
+    if route <> invalid then logoUrl = Routes_LogoUrl(Util_Str(route.airlineIata))
     if logoUrl <> "" then
         setUri(m.heroLogo, logoUrl)
         m.heroLogo.visible = true
@@ -233,9 +233,16 @@ sub refresh()
         m.heroLogo.visible = false
     end if
     routeLabel = Routes_Label(route)
-    if routeLabel = "" then routeLabel = "Route unavailable"
+    cities = Routes_CityLabel(route)
+    if routeLabel = "" then
+        routeLabel = "Route unavailable"
+        if route <> invalid and route.rejected = true then
+            routeLabel = "Route unknown"
+            cities = "listed leg for this flight number does not match its position"
+        end if
+    end if
     setText(m.heroRoute, routeLabel)
-    setText(m.heroCities, Routes_CityLabel(route))
+    setText(m.heroCities, cities)
     stats = Format_Altitude(Util_ToInt(nearest.altFt), nearest.ground = true)
     speed = Format_Speed(Util_ToInt(nearest.speedKts))
     if speed <> "" then stats = stats + "  -  " + speed
@@ -256,7 +263,7 @@ sub refresh()
             setText(row.name, Flights_DisplayName(ac))
             setText(row.detail, Format_Summary(ac, acRoute))
             rowLogo = ""
-            if acRoute <> invalid and acRoute.found then rowLogo = Routes_LogoUrl(acRoute.airlineIata)
+            if acRoute <> invalid then rowLogo = Routes_LogoUrl(Util_Str(acRoute.airlineIata))
             if rowLogo <> "" then
                 setUri(row.logo, rowLogo)
                 row.logo.visible = true

@@ -13,6 +13,7 @@ sub FlightWall_RunTests(args as Object)
         Test_Geo_HaversineSfoToLax
         Test_Geo_Bearing
         Test_Geo_Atan2Quadrants
+        Test_Geo_AngleDiff
         Test_Geo_Compass
         Test_Geo_Projection
         Test_Geo_TileKeys
@@ -37,6 +38,9 @@ sub FlightWall_RunTests(args as Object)
         Test_Routes_ParseUnknownAndGarbage
         Test_Routes_PartialRoute
         Test_Routes_LogoUrl
+        Test_Routes_ReconcileRejectsFarAwayLeg
+        Test_Routes_ReconcileSwapsReversedLeg
+        Test_Routes_ReconcileKeepsPlausibleRoutes
         Test_Routes_Pick
         Test_Format_Thousands
         Test_Format_Measurements
