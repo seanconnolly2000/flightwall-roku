@@ -86,6 +86,34 @@ certification review. It expires after 120 days and cannot be renewed (create a 
 - `dist/flightwall-screensaver.pkg`: the screensaver-only build, for a Beta channel of type
   "screensaver".
 
+## From beta to public
+
+A beta app cannot be promoted or converted; Roku's guide says to "create a public app using your
+tested package file" once testing is done. The beta keeps running separately until it expires
+(120 days). So:
+
+1. **Manage My Channels > Add Channel > Developer SDK > Public.** Name it FlightWall (no "Roku"
+   in the name), distribution United States, language English.
+2. Re-enter the listing: copy the text from `store/LISTING.md`, upload the posters from
+   `store/artwork/` and the screenshots from `store/screenshots/`, set the privacy, terms and
+   support URLs and the support email. Classification: Screensavers (for the screensaver package)
+   or an appropriate channel category (for the channel package). Content rating: all audiences.
+3. **App Profile**: app type, contact information, and a vanity access code if you want one
+   (lets people add the channel from `my.roku.com/add/<code>` immediately after publication).
+4. **Monetization**: none (free, no ads).
+5. **App Package**: upload the **same signed `.pkg`** that passed in the beta, minimum firmware
+   Roku OS 15.1 or later.
+6. **Deep linking**: a screensaver has no content to deep-link; for the channel listing, state
+   that the app has no deep-linkable content (it shows live data only).
+7. **Static Analysis**: run it; every error must be cleared (warnings are allowed).
+8. **App Behavior Analysis** (Roku's automated runtime test) runs after upload; fix anything it
+   reports.
+9. **Preview and Publish > Submit for publishing** and pick a publish date. Roku's reviewers
+   then certify the app, typically within one to two weeks, and email the outcome. Once published,
+   the app appears in its Streaming Store category within minutes and in search within a day.
+
+The beta listing can be deleted once the public app is live, or left to expire.
+
 ## 3. Dashboard
 
 In the Developer Dashboard choose **Manage My Channels > Add Channel > Developer SDK**, then:
