@@ -34,6 +34,23 @@ uv run flightwall deploy                          # optional: put the interactiv
 `sign` saves `dist/flightwall-screensaver.pkg`. Bump `major_version` / `minor_version` /
 `build_version` in `roku/manifest` for every submission.
 
+> **Upload the `.pkg`, never the `.zip`.** The zips in `dist/` are for side-loading only. The
+> Developer Dashboard rejects them with "The file you uploaded is incorrectly packaged". Only a
+> `.pkg` produced by `flightwall sign` (that is, signed by the Roku with your genkey key) is
+> accepted, for Beta channels and public channels alike.
+
+## Beta channel (optional first step)
+
+A Beta channel lets up to 20 people install the channel from a link without side-loading, with no
+certification review. It expires after 120 days and cannot be renewed (create a new one). Use
+**Manage My Channels > Add Channel > Beta** and upload a `.pkg`:
+
+- `dist/flightwall.pkg`: the full interactive channel (map, settings screen, Play for the log).
+  Sign it with the interactive build installed: `flightwall deploy` then
+  `flightwall sign --out dist/flightwall.pkg`.
+- `dist/flightwall-screensaver.pkg`: the screensaver-only build for the Screensavers menu.
+  Sign it with that build installed: `flightwall deploy --screensaver-only` then `flightwall sign`.
+
 ## 3. Dashboard
 
 In the Developer Dashboard choose **Manage My Channels > Add Channel > Developer SDK**, then:

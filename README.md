@@ -225,8 +225,9 @@ uv run flightwall deploy --host <roku-ip> --screensaver-only    # the store buil
 uv run flightwall sign --host <roku-ip> --signing-password <genkey password> --app-name FlightWall/1.0
 ```
 
-The signed `.pkg` lands in `dist/`. Uploading it, filling in the listing and passing Roku's
-certification review happen in the Roku Developer Dashboard under your own account.
+The signed `.pkg` lands in `dist/`. Upload that file, not the `.zip` (the dashboard rejects
+zips as "incorrectly packaged"); the zips are for side-loading only. Filling in the listing and
+passing Roku's certification review happen in the Roku Developer Dashboard under your own account.
 
 ## Credits and licenses
 
