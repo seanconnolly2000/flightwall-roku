@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="DiagnosticsPanel" extends="Group">
+  <interface>
+    <field id="lines" type="array" onChange="onLinesChanged"/>
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/lib/util.brs"/>
+  <script type="text/brightscript" uri="pkg:/components/DiagnosticsPanel.brs"/>
+  <children>
+    <Rectangle id="backdrop" translation="[40, 40]" width="1200" height="640" color="0x000000E6"/>
+    <Label id="title" translation="[64, 56]" width="1150" color="0xFFFFFFFF" text="Activity log (newest last)  -  Play or Back to close"/>
+    <Label id="body" translation="[64, 96]" width="1150" height="570" wrap="true" color="0xC9D1D9FF"/>
+  </children>
+</component>

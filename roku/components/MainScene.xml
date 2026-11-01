@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="MainScene" extends="Scene">
+  <interface>
+    <field id="launchParams" type="assocarray" onChange="onLaunch"/>
+    <field id="exitRequested" type="boolean" value="false"/>
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/lib/util.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/geo.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/settings.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/routes.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/flights.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/format.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/audit.brs"/>
+  <script type="text/brightscript" uri="pkg:/components/MainScene.brs"/>
+  <children>
+    <Rectangle id="background" width="1280" height="720" color="0x000000FF"/>
+    <MapView id="map" translation="[10, 10]"/>
+    <InfoPanel id="panel" translation="[740, 0]"/>
+    <DiagnosticsPanel id="diag" visible="false"/>
+    <SettingsPanel id="settingsPanel" visible="false"/>
+    <Timer id="pollTimer" repeat="true" duration="10"/>
+    <Timer id="clockTimer" repeat="true" duration="1"/>
+  </children>
+</component>

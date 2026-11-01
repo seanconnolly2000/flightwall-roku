@@ -1,0 +1,350 @@
+' Orchestrates settings, ZIP lookup, polling, back-off and the panels.
+' The same scene runs as the channel (interactive) and as the screensaver.
+
+sub init()
+    m.top.backgroundColor = "0x000000FF"
+    m.map = m.top.findNode("map")
+    m.panel = m.top.findNode("panel")
+    m.diag = m.top.findNode("diag")
+    m.settingsPanel = m.top.findNode("settingsPanel")
+    m.pollTimer = m.top.findNode("pollTimer")
+    m.clockTimer = m.top.findNode("clockTimer")
+
+    m.screensaver = false
+    m.started = false
+    m.settings = Settings_Load()
+    m.audit = Audit_Load()
+    m.routes = {}
+    m.aircraft = []
+    m.strikes = 0
+    m.busy = false
+    m.token = ""
+    m.tokenExpiry = 0
+    m.credits = -1
+    m.pollCount = 0
+
+    loadStaticData()
+
+    m.flightTask = CreateObject("roSGNode", "FlightTask")
+    m.flightTask.observeField("result", "onFlightResult")
+    m.lookupTask = CreateObject("roSGNode", "LookupTask")
+    m.lookupTask.observeField("result", "onLookupResult")
+    m.pollTimer.observeField("fire", "onPollTimer")
+    m.clockTimer.observeField("fire", "onClockTimer")
+    m.settingsPanel.observeField("result", "onSettingsResult")
+
+    onClockTimer()
+    m.clockTimer.control = "start"
+    m.top.setFocus(true)
+end sub
+
+sub loadStaticData()
+    tilesIndex = ParseJson(ReadAsciiFile("pkg:/images/tiles/index.json"))
+    if Util_IsAA(tilesIndex) then m.map.tiles = tilesIndex
+    airportsJson = ParseJson(ReadAsciiFile("pkg:/data/airports.json"))
+    if Util_IsAA(airportsJson) and Util_IsArray(airportsJson.airports) then m.map.airports = airportsJson.airports
+    citiesJson = ParseJson(ReadAsciiFile("pkg:/data/cities.json"))
+    if Util_IsAA(citiesJson) and Util_IsArray(citiesJson.cities) then m.map.cities = citiesJson.cities
+end sub
+
+sub onLaunch()
+    params = m.top.launchParams
+    if Util_IsAA(params) and params.screensaver = true then m.screensaver = true
+    m.panel.screensaver = m.screensaver
+    if m.started then return
+    m.started = true
+    mode = "channel"
+    if m.screensaver then mode = "screensaver"
+    logEvent("start", mode + " on " + deviceLabel())
+    applyLaunchParams(params)
+    start()
+end sub
+
+' ZIP and radius passed on the launch command line (ECP launch/dev?zip=...&radius=...).
+sub applyLaunchParams(params as Object)
+    if not Util_IsAA(params) then return
+    zip = Util_Str(params.zip)
+    radius = Util_Str(params.radius)
+    changed = false
+    if Settings_IsZipValid(zip) and zip <> Util_Str(m.settings.zip) then
+        m.settings.zip = zip
+        m.settings.lat = ""
+        m.settings.lon = ""
+        m.settings.place = ""
+        changed = true
+    end if
+    if radius <> "" and Util_ToFloat(radius, 0) >= 5 and Util_ToFloat(radius, 0) <= 250 then
+        m.settings.radius = Util_Round(Util_ToFloat(radius, 50)).ToStr()
+        changed = true
+    end if
+    if changed then
+        Settings_Save(m.settings)
+        logEvent("settings", "launch parameters: zip=" + Util_Str(m.settings.zip) + " radius=" + Util_Str(m.settings.radius))
+    end if
+end sub
+
+function deviceLabel() as String
+    info = CreateObject("roDeviceInfo")
+    return info.GetModelDisplayName() + " (" + info.GetModel() + ") OS " + info.GetOSVersion().major + "." + info.GetOSVersion().minor
+end function
+
+sub logEvent(event as String, detail as String)
+    Audit_Append(m.audit, Audit_Now(event, detail))
+    if m.diag.visible then m.diag.lines = m.audit
+end sub
+
+sub onClockTimer()
+    m.panel.clock = Format_Now(false)
+end sub
+
+' Entry point after launch and after every settings change.
+sub start()
+    applySettingsToViews()
+    if not Settings_IsZipValid(Util_Str(m.settings.zip)) then
+        if m.screensaver then
+            m.panel.banner = "Set your ZIP code first: Settings > Theme > Screensavers > FlightWall > Change screensaver settings (or open the FlightWall channel and press *)."
+        else
+            openSettings("Welcome to FlightWall. Enter your ZIP code and pick a radius to begin.", "zip")
+        end if
+        return
+    end if
+    if not Settings_IsConfigured(m.settings) then
+        lookupZip(Util_Str(m.settings.zip))
+        return
+    end if
+    startPolling()
+end sub
+
+sub applySettingsToViews()
+    m.map.options = {
+        cityLabels: Settings_Flag(m.settings, "cityLabels")
+        planeLabels: Settings_Flag(m.settings, "planeLabels")
+        trails: Settings_Flag(m.settings, "trails")
+    }
+    if Settings_IsConfigured(m.settings) then
+        m.map.center = {
+            lat: Util_ToFloat(m.settings.lat)
+            lon: Util_ToFloat(m.settings.lon)
+            radiusMiles: Settings_Radius(m.settings)
+        }
+    end if
+    m.panel.location = {
+        zip: Util_Str(m.settings.zip)
+        place: Util_Str(m.settings.place)
+        radius: Settings_Radius(m.settings)
+        provider: Settings_ProviderName(Util_Str(m.settings.provider))
+    }
+end sub
+
+sub lookupZip(zip as String)
+    m.panel.banner = "Looking up ZIP " + zip + "..."
+    m.lookupTask.zip = zip
+    m.lookupTask.control = "RUN"
+end sub
+
+sub onLookupResult()
+    result = m.lookupTask.result
+    if not Util_IsAA(result) then return
+    if result.ok then
+        m.settings.lat = Util_FloatStr(result.lat, 5)
+        m.settings.lon = Util_FloatStr(result.lon, 5)
+        m.settings.place = Util_Str(result.place)
+        Settings_Save(m.settings)
+        logEvent("zip", Util_Str(result.zip) + " -> " + m.settings.lat + "," + m.settings.lon + " " + m.settings.place)
+        Audit_Save(m.audit)
+        m.panel.banner = ""
+        applySettingsToViews()
+        startPolling()
+    else
+        logEvent("zip-error", Util_Str(result.message))
+        if m.screensaver then
+            m.panel.banner = Util_Str(result.message)
+        else
+            openSettings(Util_Str(result.message) + ". Please check the ZIP code.", "zip")
+        end if
+    end if
+end sub
+
+sub startPolling()
+    m.strikes = 0
+    m.pollTimer.control = "stop"
+    m.pollTimer.duration = Settings_PollSeconds(m.settings)
+    m.pollTimer.control = "start"
+    poll()
+end sub
+
+sub onPollTimer()
+    poll()
+end sub
+
+sub poll()
+    if m.busy then return
+    if m.settingsPanel.visible then return
+    if not Settings_IsConfigured(m.settings) then return
+    lat = Util_ToFloat(m.settings.lat)
+    lon = Util_ToFloat(m.settings.lon)
+    radius = Settings_Radius(m.settings)
+    provider = Util_Str(m.settings.provider)
+    lookups = []
+    if Settings_Flag(m.settings, "routes") then lookups = Routes_Pick(m.aircraft, m.routes, 3)
+    m.flightTask.request = {
+        provider: provider
+        url: Flights_ProviderUrl(provider, lat, lon, radius)
+        lat: lat
+        lon: lon
+        radius: radius
+        clientId: Util_Str(m.settings.openskyClientId)
+        clientSecret: Util_Str(m.settings.openskyClientSecret)
+        token: m.token
+        tokenExpiry: m.tokenExpiry
+        routeLookups: lookups
+    }
+    m.busy = true
+    m.flightTask.control = "RUN"
+end sub
+
+sub onFlightResult()
+    m.busy = false
+    result = m.flightTask.result
+    if not Util_IsAA(result) then return
+    m.pollCount = m.pollCount + 1
+    m.token = Util_Str(result.token)
+    m.tokenExpiry = Util_ToInt(result.tokenExpiry, 0)
+    providerName = Settings_ProviderName(Util_Str(m.settings.provider))
+    if result.ok then
+        m.strikes = 0
+        m.aircraft = result.aircraft
+        if Settings_Flag(m.settings, "hideGround") then m.aircraft = Flights_Airborne(m.aircraft)
+        if Util_IsAA(result.routes) then
+            for each callsign in result.routes
+                m.routes[callsign] = result.routes[callsign]
+            end for
+        end if
+        m.credits = Util_ToInt(result.credits, -1)
+        m.map.routes = m.routes
+        m.map.aircraft = m.aircraft
+        m.panel.routes = m.routes
+        m.panel.aircraft = m.aircraft
+        m.panel.banner = ""
+        normal = Settings_PollSeconds(m.settings)
+        if m.pollTimer.duration <> normal then
+            m.pollTimer.control = "stop"
+            m.pollTimer.duration = normal
+            m.pollTimer.control = "start"
+        end if
+        logEvent("poll", providerName + " HTTP 200 " + m.aircraft.Count().ToStr() + " aircraft " + Util_ToInt(result.elapsedMs).ToStr() + " ms")
+    else
+        m.strikes = m.strikes + 1
+        backoff = Flights_Backoff(Settings_PollSeconds(m.settings), m.strikes)
+        m.pollTimer.control = "stop"
+        m.pollTimer.duration = backoff
+        m.pollTimer.control = "start"
+        logEvent("poll-error", providerName + " " + Util_Str(result.kind) + " " + Util_Str(result.message) + " (retry in " + backoff.ToStr() + "s)")
+        m.panel.banner = describeError(result, providerName, backoff)
+        if not m.screensaver and not m.settingsPanel.visible then
+            if Flights_NeedsKeyPrompt(Util_Str(result.kind), m.strikes, Util_Str(m.settings.provider), Settings_HasCredentials(m.settings)) then
+                openSettings(keyPrompt(result, providerName), "provider")
+            end if
+        end if
+    end if
+    m.panel.status = {
+        updated: Format_Now(true)
+        count: m.aircraft.Count()
+        credits: m.credits
+        kind: Util_Str(result.kind)
+        message: Util_Str(result.message)
+        nextSeconds: m.pollTimer.duration
+    }
+    if (m.pollCount MOD 6 = 0) or not result.ok then Audit_Save(m.audit)
+end sub
+
+function describeError(result as Object, providerName as String, backoff as Integer) as String
+    kind = Util_Str(result.kind)
+    retry = " Retrying in " + backoff.ToStr() + " seconds."
+    if kind = "ratelimited" then return providerName + " is rate limiting this device (HTTP 429)." + retry + " Press * to switch data source or add OpenSky credentials."
+    if kind = "auth" then return providerName + " rejected the request (" + Util_Str(result.message) + "). Press * to check the credentials."
+    if kind = "network" then return "Network problem reaching " + providerName + ": " + Util_Str(result.message) + "." + retry
+    return providerName + " error: " + Util_Str(result.message) + "." + retry
+end function
+
+function keyPrompt(result as Object, providerName as String) as String
+    if Util_Str(result.kind) = "auth" then
+        return providerName + " rejected the credentials. Check the OpenSky client ID and secret, or switch data source."
+    end if
+    return providerName + " has rate limited this device (HTTP 429). Switch to another free data source, or add free OpenSky account credentials for a higher daily limit."
+end function
+
+sub openSettings(message as String, focusRow as String)
+    m.pollTimer.control = "stop"
+    m.settingsPanel.message = message
+    m.settingsPanel.focusRow = focusRow
+    m.settingsPanel.settings = m.settings
+    m.settingsPanel.visible = true
+    m.settingsPanel.setFocus(true)
+end sub
+
+sub onSettingsResult()
+    result = m.settingsPanel.result
+    if not Util_IsAA(result) then return
+    m.settingsPanel.visible = false
+    m.top.setFocus(true)
+    if result.saved = true then
+        previous = m.settings
+        m.settings = Settings_Defaults()
+        m.settings.Append(result.settings)
+        if Util_Str(previous.zip) <> Util_Str(m.settings.zip) then
+            m.settings.lat = ""
+            m.settings.lon = ""
+            m.settings.place = ""
+        end if
+        providerChanged = Util_Str(previous.provider) <> Util_Str(m.settings.provider)
+        credentialsChanged = Util_Str(previous.openskyClientId) <> Util_Str(m.settings.openskyClientId) or Util_Str(previous.openskyClientSecret) <> Util_Str(m.settings.openskyClientSecret)
+        if providerChanged or credentialsChanged then
+            m.token = ""
+            m.tokenExpiry = 0
+            m.strikes = 0
+        end if
+        Settings_Save(m.settings)
+        logEvent("settings", "saved from remote: zip=" + Util_Str(m.settings.zip) + " radius=" + Util_Str(m.settings.radius) + " source=" + Util_Str(m.settings.provider) + " poll=" + Util_Str(m.settings.pollSeconds) + "s credentials=" + Util_Str(Settings_HasCredentials(m.settings)))
+        Audit_Save(m.audit)
+        start()
+    else if Settings_IsConfigured(m.settings) then
+        startPolling()
+    else
+        m.panel.banner = "Press * to enter your ZIP code."
+    end if
+end sub
+
+sub toggleDiagnostics()
+    m.diag.visible = not m.diag.visible
+    if m.diag.visible then m.diag.lines = m.audit
+end sub
+
+function onKeyEvent(key as String, press as Boolean) as Boolean
+    if not press then return false
+    if m.screensaver then return false
+    if m.settingsPanel.visible then return false
+    if key = "options" or key = "OK" then
+        openSettings("", "zip")
+        return true
+    end if
+    if key = "play" then
+        toggleDiagnostics()
+        return true
+    end if
+    if key = "back" and m.diag.visible then
+        m.diag.visible = false
+        return true
+    end if
+    if key = "up" or key = "down" then
+        delta = 1
+        if key = "down" then delta = -1
+        m.settings.radius = Settings_NextValue(Settings_RadiusOptions(), Util_Str(m.settings.radius), delta)
+        Settings_Save(m.settings)
+        logEvent("radius", m.settings.radius + " miles")
+        applySettingsToViews()
+        poll()
+        return true
+    end if
+    return false
+end function

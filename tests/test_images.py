@@ -1,0 +1,73 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from PIL import Image
+
+from flightwall_tools import images
+
+
+def px(image: Image.Image, xy: tuple[int, int]) -> tuple[int, ...]:
+    value = image.getpixel(xy)
+    assert isinstance(value, tuple)
+    return value
+
+
+def test_sprite_naming() -> None:
+    assert images.sprite_headings()[:3] == [0, 10, 20]
+    assert len(images.sprite_headings()) == 36
+    assert images.sprite_filename(0) == "plane_000.png"
+    assert images.sprite_filename(350) == "plane_350.png"
+
+
+def test_nearest_sprite_heading() -> None:
+    assert images.nearest_sprite_heading(0) == 0
+    assert images.nearest_sprite_heading(4.9) == 0
+    assert images.nearest_sprite_heading(14) == 10
+    assert images.nearest_sprite_heading(355) == 0
+    assert images.nearest_sprite_heading(359.9) == 0
+    assert images.nearest_sprite_heading(184) == 180
+
+
+def test_plane_sprite_points_north_then_rotates() -> None:
+    north = images.plane_sprite(0)
+    assert north.size == (32, 32)
+    assert px(north, (16, 3))[3] > 0
+    assert px(north, (3, 3))[3] == 0
+    east = images.plane_sprite(90)
+    assert px(east, (28, 16))[3] > 0
+    assert px(east, (16, 3))[3] == 0
+
+
+def test_dots_and_mask() -> None:
+    solid = images.dot(8)
+    assert px(solid, (4, 4))[3] == 255
+    assert px(solid, (0, 0))[3] == 0
+    hollow = images.dot(12, hollow=True)
+    assert px(hollow, (6, 6))[3] == 0
+    assert px(hollow, (6, 2))[3] > 0
+    mask = images.circle_mask(100, 40)
+    assert px(mask, (50, 50))[3] == 0
+    assert px(mask, (1, 1)) == images.BLACK
+    assert px(mask, (50, 10))[3] == 255
+
+
+def test_line_segment_fades() -> None:
+    line = images.line_segment(10, 2)
+    assert line.size == (10, 2)
+    assert px(line, (0, 0))[3] == 255
+    assert px(line, (9, 1))[3] < 40
+
+
+def test_branded_panel() -> None:
+    plain = images.branded_panel(120, 90)
+    assert plain.size == (120, 90)
+    with_subtitle = images.branded_panel(200, 120, "subtitle")
+    assert px(with_subtitle, (0, 0)) == images.BLACK
+
+
+def test_build_images(tmp_path: Path) -> None:
+    written = images.build_images(tmp_path / "images")
+    assert len(written) == 36 + 6 + 3 + 3
+    for name in written:
+        assert (tmp_path / "images" / name).exists()

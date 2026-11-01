@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="MapView" extends="Group">
+  <interface>
+    <field id="center" type="assocarray" onChange="onCenterChanged"/>
+    <field id="aircraft" type="array" onChange="onAircraftChanged"/>
+    <field id="routes" type="assocarray"/>
+    <field id="options" type="assocarray" onChange="onOptionsChanged"/>
+    <field id="airports" type="array"/>
+    <field id="cities" type="array"/>
+    <field id="tiles" type="assocarray"/>
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/lib/util.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/geo.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/routes.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/flights.brs"/>
+  <script type="text/brightscript" uri="pkg:/components/MapView.brs"/>
+  <children>
+    <Group id="root" translation="[350, 350]">
+      <Group id="tileLayer"/>
+      <Group id="cityLayer"/>
+      <Group id="airportLayer"/>
+      <Group id="trailLayer"/>
+      <Group id="lineLayer"/>
+      <Group id="planeLayer"/>
+      <Poster id="home" uri="pkg:/images/home.png" width="14" height="14" translation="[-7, -7]"/>
+      <Poster id="mask" uri="pkg:/images/mask.png" width="700" height="700" translation="[-350, -350]"/>
+    </Group>
+    <Label id="radiusLabel" translation="[14, 668]" color="0x6E7681FF"/>
+  </children>
+</component>

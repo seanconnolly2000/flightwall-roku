@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="LookupTask" extends="Task">
+  <interface>
+    <field id="zip" type="string"/>
+    <field id="result" type="assocarray" alwaysNotify="true"/>
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/lib/util.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/geo.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/zips.brs"/>
+  <script type="text/brightscript" uri="pkg:/components/LookupTask.brs"/>
+</component>

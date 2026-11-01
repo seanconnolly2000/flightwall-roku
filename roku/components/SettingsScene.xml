@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="SettingsScene" extends="Scene">
+  <interface>
+    <field id="launchParams" type="assocarray"/>
+    <field id="exitRequested" type="boolean" value="false"/>
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/lib/util.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/geo.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/settings.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/routes.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/format.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/audit.brs"/>
+  <script type="text/brightscript" uri="pkg:/components/SettingsScene.brs"/>
+  <children>
+    <Rectangle id="background" width="1280" height="720" color="0x000000FF"/>
+    <SettingsPanel id="settingsPanel"/>
+  </children>
+</component>
