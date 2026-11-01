@@ -21,7 +21,10 @@ uv run flightwall genkey --host <roku-ip>
 ```
 
 Save the printed **password** and **DevID** somewhere safe (a password manager), and put them in
-the git-ignored `.env` as `ROKU_SIGNING_PASSWORD` and `ROKU_DEV_ID` so `sign` finds them. Then
+the git-ignored `.env` as `ROKU_SIGNING_PASSWORD` and `ROKU_DEV_ID` so `sign` finds them.
+Expect one side effect: Roku keys a side-loaded app's saved settings by developer ID, so the
+next launch after `genkey` starts with an empty registry (ZIP, radius and preferences must be
+re-entered, or passed as launch parameters). Then
 build the screensaver package (Roku rejects screensavers that also have a `Main()` entry point),
 install it, and sign it:
 

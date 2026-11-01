@@ -83,8 +83,10 @@ You can also set the ZIP and radius from your PC through the Roku's External Con
 Protocol, which saves them exactly as if typed on the TV:
 
 ```bash
-curl -d "" "http://<roku-ip>:8060/launch/dev?zip=94110&radius=50"
+curl -d "" "http://<roku-ip>:8060/launch/dev?zip=94110&radius=50&poll=20"
 ```
+
+(`poll` is the refresh interval in seconds, 5 to 600; all three parameters are optional.)
 
 To see what the TV is showing without walking over: `uv run flightwall screenshot --host <ip>`
 writes `dist/screenshot.jpg` using the installer's screenshot utility.

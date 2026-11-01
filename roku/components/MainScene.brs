@@ -136,9 +136,14 @@ sub applyLaunchParams(params as Object)
         m.settings.radius = Util_Round(Util_ToFloat(radius, 50)).ToStr()
         changed = true
     end if
+    poll = Util_Str(params.poll)
+    if poll <> "" and Util_ToInt(poll, 0) >= 5 and Util_ToInt(poll, 0) <= 600 then
+        m.settings.pollSeconds = Util_ToInt(poll, 10).ToStr()
+        changed = true
+    end if
     if changed then
         Settings_Save(m.settings)
-        logEvent("settings", "launch parameters: zip=" + Util_Str(m.settings.zip) + " radius=" + Util_Str(m.settings.radius))
+        logEvent("settings", "launch parameters: zip=" + Util_Str(m.settings.zip) + " radius=" + Util_Str(m.settings.radius) + " poll=" + Util_Str(m.settings.pollSeconds) + "s")
     end if
 end sub
 
