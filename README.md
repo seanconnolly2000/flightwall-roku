@@ -59,9 +59,13 @@ so `uv run flightwall package` alone is enough if you only changed BrightScript.
 Review the code first if you like (`roku/` is the whole channel), then:
 
 ```bash
-set ROKU_DEV_PASSWORD=yourpassword          # PowerShell: $env:ROKU_DEV_PASSWORD="yourpassword"
-uv run flightwall deploy --host <roku-ip>
+cp .env.example .env            # then fill in ROKU_HOST and ROKU_DEV_PASSWORD
+uv run flightwall deploy
 ```
+
+The CLI reads `.env` from the project root (it is git-ignored). Flags override it, so
+`uv run flightwall deploy --host <roku-ip> --password <pw>` works without a `.env`, as does
+setting `ROKU_DEV_PASSWORD` in the environment.
 
 `deploy` runs the static checks, zips `roku/`, and posts the package to the Roku's
 Development Application Installer (HTTP digest auth, user `rokudev`). The channel launches

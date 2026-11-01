@@ -20,14 +20,15 @@ password: every future update must be signed with the same key.
 uv run flightwall genkey --host <roku-ip>
 ```
 
-Save the printed **password** and **DevID** somewhere safe (a password manager). Then build the
-screensaver package (Roku rejects screensavers that also have a `Main()` entry point), install it,
-and sign it:
+Save the printed **password** and **DevID** somewhere safe (a password manager), and put them in
+the git-ignored `.env` as `ROKU_SIGNING_PASSWORD` and `ROKU_DEV_ID` so `sign` finds them. Then
+build the screensaver package (Roku rejects screensavers that also have a `Main()` entry point),
+install it, and sign it:
 
 ```bash
-uv run flightwall deploy --host <roku-ip> --screensaver-only
-uv run flightwall sign --host <roku-ip> --signing-password <genkey password> --app-name FlightWall/1.0
-uv run flightwall deploy --host <roku-ip>        # optional: put the interactive build back
+uv run flightwall deploy --screensaver-only
+uv run flightwall sign --app-name FlightWall/1.0
+uv run flightwall deploy                          # optional: put the interactive build back
 ```
 
 `sign` saves `dist/flightwall-screensaver.pkg`. Bump `major_version` / `minor_version` /

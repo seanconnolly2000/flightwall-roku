@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -322,6 +323,47 @@ def test_genkey_and_sign_commands(project: Path, capsys: pytest.CaptureFixture[s
         == 1
     )
     assert "Signing failed" in capsys.readouterr().out
+
+
+def test_load_dotenv(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("FW_TEST_A", raising=False)
+    monkeypatch.delenv("FW_TEST_B", raising=False)
+    monkeypatch.setenv("FW_TEST_C", "already-set")
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "# comment\n\nFW_TEST_A=plain\nexport FW_TEST_B=\"quoted value\"\nFW_TEST_C='ignored'\n"
+        "not a pair\n=novalue\n",
+        encoding="utf-8",
+    )
+    loaded = cli.load_dotenv(env_file)
+    assert loaded == {"FW_TEST_A": "plain", "FW_TEST_B": "quoted value", "FW_TEST_C": "ignored"}
+    assert os.environ["FW_TEST_A"] == "plain"
+    assert os.environ["FW_TEST_B"] == "quoted value"
+    assert os.environ["FW_TEST_C"] == "already-set"
+    assert cli.load_dotenv(tmp_path / "missing.env") == {}
+    for key in ("FW_TEST_A", "FW_TEST_B"):
+        monkeypatch.delenv(key)
+
+
+def test_host_and_secrets_from_dotenv(
+    project: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    for key in (cli.HOST_ENV, cli.PASSWORD_ENV, cli.SIGNING_PASSWORD_ENV):
+        monkeypatch.delenv(key, raising=False)
+    assert run("screenshot", "--password", "pw", root=project, factory=fake_factory()) == 2
+    assert "No Roku address" in capsys.readouterr().out
+    assert run("sign", "--host", "h", "--password", "pw", root=project, factory=fake_factory()) == 2
+    assert "No signing password" in capsys.readouterr().out
+
+    (project / ".env").write_text(
+        f"{cli.HOST_ENV}=10.0.0.9\n{cli.PASSWORD_ENV}=pw\n{cli.SIGNING_PASSWORD_ENV}=s3cret\n",
+        encoding="utf-8",
+    )
+    assert run("screenshot", root=project, factory=fake_factory()) == 0
+    assert run("sign", root=project, factory=fake_factory()) == 0
+    assert (project / "dist" / "flightwall-screensaver.pkg").exists()
+    for key in (cli.HOST_ENV, cli.PASSWORD_ENV, cli.SIGNING_PASSWORD_ENV):
+        monkeypatch.delenv(key)
 
 
 def test_commands_refuse_broken_channel(project: Path, capsys: pytest.CaptureFixture[str]) -> None:

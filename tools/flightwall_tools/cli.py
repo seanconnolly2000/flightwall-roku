@@ -23,6 +23,10 @@ from .tiles import DEFAULT_REGIONS, PX_PER_DEG, REGIONS, build_tiles
 from .zips import build_zips
 
 PASSWORD_ENV = "ROKU_DEV_PASSWORD"  # noqa: S105 - name of the variable, not a secret
+SIGNING_PASSWORD_ENV = "ROKU_SIGNING_PASSWORD"  # noqa: S105 - name of the variable, not a secret
+HOST_ENV = "ROKU_HOST"
+DOTENV_NAME = ".env"
+EXIT_USAGE = 2
 
 
 @dataclass(frozen=True)
@@ -53,6 +57,26 @@ def make_device(host: str, password: str) -> RokuDevice:
     return RokuDevice(host, password)
 
 
+def load_dotenv(path: Path) -> dict[str, str]:
+    """Load KEY=VALUE lines from a .env file into the environment (existing values win)."""
+    loaded: dict[str, str] = {}
+    if not path.is_file():
+        return loaded
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip().removeprefix("export ").strip()
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":  # noqa: PLR2004
+            value = value[1:-1]
+        if key:
+            loaded[key] = value
+            os.environ.setdefault(key, value)
+    return loaded
+
+
 def resolve_password(explicit: str | None, prompt: Callable[[str], str] = getpass.getpass) -> str:
     if explicit:
         return explicit
@@ -60,6 +84,10 @@ def resolve_password(explicit: str | None, prompt: Callable[[str], str] = getpas
     if from_env:
         return from_env
     return prompt("Roku developer password: ")
+
+
+def resolve_host(explicit: str | None) -> str:
+    return explicit or os.environ.get(HOST_ENV, "")
 
 
 def cmd_build_data(args: argparse.Namespace, paths: Paths) -> int:
@@ -202,10 +230,14 @@ def cmd_genkey(args: argparse.Namespace, _paths: Paths, factory: DeviceFactory) 
 
 
 def cmd_sign(args: argparse.Namespace, paths: Paths, factory: DeviceFactory) -> int:
+    signing_password = args.signing_password or os.environ.get(SIGNING_PASSWORD_ENV, "")
+    if not signing_password:
+        print(f"No signing password: pass --signing-password or set {SIGNING_PASSWORD_ENV} in .env")
+        return EXIT_USAGE
     device = factory(args.host, resolve_password(args.password))
     out_path = Path(args.out) if args.out else paths.dist / "flightwall-screensaver.pkg"
     try:
-        saved = device.sign(args.app_name, args.signing_password, out_path)
+        saved = device.sign(args.app_name, signing_password, out_path)
     except DeviceError as exc:
         print(f"Signing failed: {exc}")
         return 1
@@ -238,9 +270,10 @@ def cmd_all(args: argparse.Namespace, paths: Paths) -> int:
 
 
 def _add_device_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--host", required=True, help="Roku IP address")
+    parser.add_argument("--host", help=f"Roku IP address (or set {HOST_ENV} in .env)")
     parser.add_argument(
-        "--password", help=f"developer password (or set {PASSWORD_ENV}; prompted otherwise)"
+        "--password",
+        help=f"developer password (or set {PASSWORD_ENV} in .env; prompted otherwise)",
     )
 
 
@@ -298,7 +331,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("sign", help="sign the installed channel and download the .pkg")
     _add_device_args(p)
-    p.add_argument("--signing-password", required=True, help="password printed by genkey")
+    p.add_argument(
+        "--signing-password",
+        help=f"password printed by genkey (or set {SIGNING_PASSWORD_ENV} in .env)",
+    )
     p.add_argument(
         "--app-name", default="FlightWall/1.0", help="name/version embedded in the package"
     )
@@ -315,6 +351,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None, factory: DeviceFactory = make_device) -> int:
     args = build_parser().parse_args(argv)
     paths = Paths(Path(args.project_root) if args.project_root else default_root())
+    load_dotenv(paths.root / DOTENV_NAME)
     simple: dict[str, Callable[[argparse.Namespace, Paths], int]] = {
         "build-data": cmd_build_data,
         "images": cmd_images,
@@ -332,6 +369,10 @@ def main(argv: Sequence[str] | None = None, factory: DeviceFactory = make_device
     }
     if args.command in simple:
         return simple[args.command](args, paths)
+    args.host = resolve_host(args.host)
+    if not args.host:
+        print(f"No Roku address: pass --host or set {HOST_ENV} in .env")
+        return EXIT_USAGE
     return device_commands[args.command](args, paths, factory)
 
 
