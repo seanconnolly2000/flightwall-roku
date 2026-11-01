@@ -18,7 +18,6 @@ sub init()
     m.planes = {}
     m.trails = {}
     m.lines = {}
-    m.history = {}
     m.options = { cityLabels: true, planeLabels: true, trails: true }
     m.fontLabel = makeFont(true, 16)
     m.fontSmall = makeFont(false, 14)
@@ -60,7 +59,6 @@ sub onCenterChanged()
     if not Util_IsAA(center) then return
     radiusMiles = Util_ToFloat(center.radiusMiles, 50)
     m.proj = Geo_Projection(Util_ToFloat(center.lat), Util_ToFloat(center.lon), radiusMiles, m.radiusPx)
-    m.history = {}
     m.planes = {}
     m.trails = {}
     m.lines = {}
@@ -226,24 +224,38 @@ function createPlane() as Object
     route.translation = [-28, 34]
     route.font = m.fontSmall
     route.color = "0x8B949EFF"
-    return { group: group, icon: icon, logo: logo, label: label, route: route }
+    return { group: group, icon: icon, logo: logo, label: label, route: route, color: "" }
 end function
+
+' Only touch node fields when the value changed: every field write schedules a re-render.
+sub setUri(poster as Object, uri as String)
+    if poster.uri <> uri then poster.uri = uri
+end sub
+
+sub setText(label as Object, text as String)
+    if label.text <> text then label.text = text
+end sub
 
 sub updatePlane(plane as Object, ac as Object, pt as Object, route as Object)
     plane.group.translation = [pt.x, pt.y]
-    plane.icon.uri = "pkg:/images/planes/" + Flights_SpriteName(Util_ToFloat(ac.track, -1)) + ".png"
-    plane.icon.blendColor = Flights_AltitudeColor(Util_ToInt(ac.altFt), ac.ground = true)
+    setUri(plane.icon, "pkg:/images/planes/" + Flights_SpriteName(Util_ToFloat(ac.track, -1)) + ".png")
+    ' Color fields read back as integers, so remember the last string we set instead of comparing.
+    color = Flights_AltitudeColor(Util_ToInt(ac.altFt), ac.ground = true)
+    if plane.color <> color then
+        plane.icon.blendColor = color
+        plane.color = color
+    end if
     showLabels = m.options.planeLabels
     plane.label.visible = showLabels
     if showLabels then
-        plane.label.text = Flights_DisplayName(ac)
+        setText(plane.label, Flights_DisplayName(ac))
         routeText = Routes_Label(route)
-        plane.route.text = routeText
+        setText(plane.route, routeText)
         plane.route.visible = routeText <> ""
         logoUrl = ""
         if route <> invalid and route.found then logoUrl = Routes_LogoUrl(route.airlineIata)
         if logoUrl <> "" then
-            if plane.logo.uri <> logoUrl then plane.logo.uri = logoUrl
+            setUri(plane.logo, logoUrl)
             plane.logo.visible = true
         else
             plane.logo.visible = false
@@ -254,43 +266,40 @@ sub updatePlane(plane as Object, ac as Object, pt as Object, route as Object)
     end if
 end sub
 
+' Breadcrumb trail: one dot is added per poll at the previous position; nothing is rebuilt.
 sub updateTrail(hex as String, pt as Object)
     if not m.options.trails then
         if m.trails.DoesExist(hex) then
-            m.trailLayer.removeChild(m.trails[hex])
+            m.trailLayer.removeChild(m.trails[hex].group)
             m.trails.Delete(hex)
         end if
         return
     end if
-    history = m.history[hex]
-    if history = invalid then history = []
-    moved = true
-    if history.Count() > 0 then
-        last = history[history.Count() - 1]
-        moved = Abs(last.x - pt.x) > 2 or Abs(last.y - pt.y) > 2
+    trail = m.trails[hex]
+    if trail = invalid then
+        trail = { group: m.trailLayer.createChild("Group"), dots: [], last: invalid }
+        m.trails[hex] = trail
     end if
-    if moved then history.Push({ x: pt.x, y: pt.y })
-    while history.Count() > 12
-        history.Shift()
-    end while
-    m.history[hex] = history
-    group = m.trails[hex]
-    if group = invalid then
-        group = m.trailLayer.createChild("Group")
-        m.trails[hex] = group
-    end if
-    clearLayer(group)
-    count = history.Count()
-    for i = 0 to count - 2
-        point = history[i]
-        dot = group.createChild("Poster")
+    last = trail.last
+    if last <> invalid then
+        if Abs(last.x - pt.x) <= 2 and Abs(last.y - pt.y) <= 2 then return
+        dot = trail.group.createChild("Poster")
         dot.uri = "pkg:/images/trail.png"
         dot.width = 4
         dot.height = 4
-        dot.translation = [point.x - 2, point.y - 2]
-        dot.opacity = 0.15 + 0.6 * (i + 1) / count
+        dot.translation = [last.x - 2, last.y - 2]
         dot.blendColor = "0x9CDCFEFF"
-    end for
+        trail.dots.Push(dot)
+        while trail.dots.Count() > 10
+            trail.group.removeChild(trail.dots[0])
+            trail.dots.Shift()
+        end while
+        count = trail.dots.Count()
+        for i = 0 to count - 1
+            trail.dots[i].opacity = 0.15 + 0.6 * (i + 1) / count
+        end for
+    end if
+    trail.last = { x: pt.x, y: pt.y }
 end sub
 
 ' A faint line from the aircraft back toward its origin airport (or, when the
@@ -361,12 +370,11 @@ sub removePlane(hex as String)
         m.planes.Delete(hex)
     end if
     if m.trails.DoesExist(hex) then
-        m.trailLayer.removeChild(m.trails[hex])
+        m.trailLayer.removeChild(m.trails[hex].group)
         m.trails.Delete(hex)
     end if
     if m.lines.DoesExist(hex) then
         m.lineLayer.removeChild(m.lines[hex])
         m.lines.Delete(hex)
     end if
-    m.history.Delete(hex)
 end sub

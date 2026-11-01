@@ -18,6 +18,8 @@ and [TheFlightWall](https://github.com/AxisNimble/TheFlightWall_OSS).
   and stored only in the device registry.
 - **Screensaver mode**: the same scene runs as a Roku screensaver (Settings > Theme >
   Screensavers), with its own "Change screensaver settings" screen.
+- **Five-day forecast** for the same ZIP code along the bottom of the panel (Open-Meteo,
+  refreshed hourly).
 - **Activity log** (press Play): every poll, error and settings change, kept in a registry
   section separate from the settings themselves.
 
@@ -28,6 +30,7 @@ Everything is keyless and free by default. Data sources:
 | Aircraft positions | [adsb.lol](https://api.adsb.lol/docs) (default), [adsb.fi](https://github.com/adsbfi/opendata), [OpenSky Network](https://openskynetwork.github.io/opensky-api/) | OpenSky anonymous access is ~400 credits/day; a free account (OAuth2 client credentials) raises it to 4000+ |
 | Routes and airlines | [adsbdb.com](https://www.adsbdb.com/) | At most 3 new callsign lookups per poll, cached for the session |
 | Airline logos | `images.kiwi.com/airlines/64/{IATA}.png` | Same public CDN OpenFlightWall uses |
+| Five-day forecast | [Open-Meteo](https://open-meteo.com/) | Free, keyless; refreshed hourly; attribution shown on screen |
 | Coastlines, lakes, cities | [Natural Earth](https://www.naturalearthdata.com/) 1:10m (public domain) | Rasterized into 1-degree tiles |
 | Airports | [OurAirports](https://ourairports.com/data/) (public domain) | US large and medium airports |
 | ZIP centroids | [US Census ZCTA gazetteer 2023](https://www.census.gov/geo/maps-data/data/gazetteer-files.html) | Bundled, looked up offline on the device |
@@ -110,6 +113,31 @@ build is produced alongside the channel. The two share the same code and the sam
 
 If your Roku lists FlightWall under Screensavers while the combined build is installed, you can
 skip step 2 and keep the channel and screensaver in one package.
+
+## Running it all day: screensaver vs. channel
+
+Roku OS exits any channel that has had no remote-control input for two hours
+(`EXIT_IDLE_AUTO_EXIT` in the debug console). There is no setting to disable it and FlightWall
+does not try to trick it. For an always-on wall display, make FlightWall the **screensaver**:
+the OS starts it itself after the idle wait time and keeps it up until a button is pressed.
+Use the channel for setup and for watching interactively.
+
+### If your receiver shows a blue screen (HDMI handshake)
+
+A SceneGraph app cannot renegotiate HDMI; the link drops when the Roku changes output mode or
+loses power. Things that help, in order:
+
+1. **Power the stick from its wall adapter**, not a USB port on the receiver or TV. Marginal
+   USB power is the most common cause of intermittent blank screens on sticks, and every poll
+   is a Wi-Fi plus TLS burst that briefly raises the stick's power draw. FlightWall now reuses
+   its HTTPS connections between polls, redraws only what changed, and updates the clock once a
+   minute instead of once a second, so its duty cycle is low, but it cannot fix a power supply.
+2. **Settings > System > Power > Auto power savings: off.** Otherwise the stick sleeps after a
+   few idle hours, drops HDMI, and has to handshake again when it wakes.
+3. **Settings > Display type: 1080p** (fixed) and **Settings > System > Advanced system settings
+   > Auto-adjust display refresh rate: off**, so nothing ever changes the output mode.
+4. On the receiver, turn HDMI Control (CEC) off for that input and set its HDMI signal format
+   to standard (non-enhanced) for a 1080p source.
 
 ## When a free source rate-limits you
 

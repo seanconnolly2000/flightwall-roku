@@ -183,6 +183,15 @@ function Flights_IsOverhead(ac as Object) as Boolean
     return (not ac.ground) and ac.distMi <= 2.0
 end function
 
+' Keeps only the closest maxCount aircraft of a distance-sorted list.
+function Flights_Nearest(aircraft as Object, maxCount as Integer) as Object
+    kept = []
+    for each ac in aircraft
+        if kept.Count() < maxCount then kept.Push(ac)
+    end for
+    return kept
+end function
+
 ' Drops aircraft that are on the ground (taxiing traffic clutters airports).
 function Flights_Airborne(aircraft as Object) as Object
     kept = []

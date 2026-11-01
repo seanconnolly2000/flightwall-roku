@@ -48,6 +48,12 @@ sub FlightWall_RunTests(args as Object)
         Test_Audit_AppendTrims
         Test_Audit_EntryFormat
         Test_Audit_LoadReturnsArray
+        Test_Weather_Url
+        Test_Weather_CodeInfo
+        Test_Weather_Days
+        Test_Weather_ParseSample
+        Test_Weather_ParseErrors
+        Test_Http_Host
     ])
     if args.IncludeFilter <> invalid then runner.SetIncludeFilter(args.IncludeFilter)
     if args.ExcludeFilter <> invalid then runner.SetExcludeFilter(args.ExcludeFilter)

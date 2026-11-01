@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="WeatherTask" extends="Task">
+  <interface>
+    <field id="request" type="assocarray"/>
+    <field id="result" type="assocarray" alwaysNotify="true"/>
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/lib/util.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/http.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/weather.brs"/>
+  <script type="text/brightscript" uri="pkg:/components/WeatherTask.brs"/>
+</component>

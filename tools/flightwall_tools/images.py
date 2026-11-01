@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -116,6 +117,83 @@ def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     return ImageFont.load_default(size=size)
 
 
+WEATHER_KINDS = ("clear", "partly", "cloudy", "fog", "rain", "snow", "storm")
+SUN = (255, 200, 87, 255)
+CLOUD = (226, 232, 240, 255)
+RAIN = (124, 196, 255, 255)
+BOLT = (255, 221, 87, 255)
+
+
+def _draw_sun(draw: ImageDraw.ImageDraw, cx: float, cy: float, r: float, s: float) -> None:
+    draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=SUN)
+    for i in range(8):
+        angle = math.radians(i * 45)
+        x0, y0 = cx + math.cos(angle) * r * 1.35, cy + math.sin(angle) * r * 1.35
+        x1, y1 = cx + math.cos(angle) * r * 1.8, cy + math.sin(angle) * r * 1.8
+        draw.line((x0, y0, x1, y1), fill=SUN, width=max(1, int(1.6 * s)))
+
+
+def _draw_cloud(draw: ImageDraw.ImageDraw, cx: float, cy: float, w: float) -> None:
+    r = w / 4
+    draw.ellipse((cx - w / 2, cy - r / 2, cx - w / 2 + 2 * r, cy + 1.5 * r), fill=CLOUD)
+    draw.ellipse((cx + w / 2 - 2 * r, cy - r / 2, cx + w / 2, cy + 1.5 * r), fill=CLOUD)
+    draw.ellipse((cx - r * 1.2, cy - r * 1.6, cx + r * 1.2, cy + r * 0.8), fill=CLOUD)
+    draw.rectangle((cx - w / 2 + r, cy + r / 2, cx + w / 2 - r, cy + 1.5 * r), fill=CLOUD)
+
+
+def weather_icon(kind: str, size: int = 36) -> Image.Image:
+    """Minimal monochrome-ish weather glyph for the forecast strip."""
+    if kind not in WEATHER_KINDS:
+        msg = f"unknown weather icon kind: {kind}"
+        raise ValueError(msg)
+    s = SUPERSAMPLE
+    big = size * s
+    canvas = Image.new("RGBA", (big, big), TRANSPARENT)
+    draw = ImageDraw.Draw(canvas)
+    c = big / 2
+    if kind == "clear":
+        _draw_sun(draw, c, c, big * 0.22, s)
+    elif kind == "partly":
+        _draw_sun(draw, big * 0.36, big * 0.36, big * 0.15, s)
+        _draw_cloud(draw, big * 0.56, big * 0.6, big * 0.66)
+    else:
+        _draw_cloud(draw, c, big * 0.42, big * 0.78)
+        _draw_precipitation(draw, kind, big, s)
+    return canvas.resize((size, size), Image.Resampling.LANCZOS)
+
+
+def _draw_precipitation(draw: ImageDraw.ImageDraw, kind: str, big: float, s: float) -> None:
+    """Whatever falls (or hangs) below the cloud for fog, rain, snow and storm icons."""
+    base = big * 0.72
+    c = big / 2
+    width = max(1, int(2 * s))
+    if kind == "fog":
+        for i in range(2):
+            y = base + i * big * 0.12
+            draw.line((big * 0.2, y, big * 0.8, y), fill=CLOUD, width=width)
+    elif kind == "rain":
+        for i in range(3):
+            x = big * (0.32 + 0.18 * i)
+            draw.line((x, base, x - big * 0.06, base + big * 0.2), fill=RAIN, width=width)
+    elif kind == "snow":
+        for i in range(3):
+            x = big * (0.32 + 0.18 * i)
+            rr = big * 0.045
+            draw.ellipse(
+                (x - rr, base + big * 0.08 - rr, x + rr, base + big * 0.08 + rr), fill=CLOUD
+            )
+    elif kind == "storm":
+        bolt = [
+            (c + big * 0.04, base - big * 0.06),
+            (c - big * 0.1, base + big * 0.12),
+            (c, base + big * 0.12),
+            (c - big * 0.04, base + big * 0.3),
+            (c + big * 0.12, base + big * 0.06),
+            (c + big * 0.02, base + big * 0.06),
+        ]
+        draw.polygon(bolt, fill=BOLT)
+
+
 def branded_panel(width: int, height: int, subtitle: str = "") -> Image.Image:
     canvas = Image.new("RGBA", (width, height), BLACK)
     draw = ImageDraw.Draw(canvas)
@@ -161,4 +239,9 @@ def build_images(images_dir: Path) -> list[str]:
     for name, (w, h) in SPLASH_SIZES.items():
         branded_panel(w, h, "Nearby flights, live on your TV").save(images_dir / name)
         written.append(name)
+    weather = images_dir / "weather"
+    weather.mkdir(parents=True, exist_ok=True)
+    for kind in WEATHER_KINDS:
+        weather_icon(kind).save(weather / f"{kind}.png")
+        written.append(f"weather/{kind}.png")
     return written

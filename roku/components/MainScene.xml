@@ -19,6 +19,7 @@
     <DiagnosticsPanel id="diag" visible="false"/>
     <SettingsPanel id="settingsPanel" visible="false"/>
     <Timer id="pollTimer" repeat="true" duration="10"/>
-    <Timer id="clockTimer" repeat="true" duration="1"/>
+    <Timer id="clockTimer" repeat="false" duration="60"/>
+    <Timer id="weatherTimer" repeat="true" duration="3600"/>
   </children>
 </component>

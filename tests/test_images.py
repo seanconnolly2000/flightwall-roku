@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from PIL import Image
 
 from flightwall_tools import images
@@ -66,8 +67,21 @@ def test_branded_panel() -> None:
     assert px(with_subtitle, (0, 0)) == images.BLACK
 
 
+def test_weather_icons() -> None:
+    for kind in images.WEATHER_KINDS:
+        icon = images.weather_icon(kind)
+        assert icon.size == (36, 36)
+        alpha = icon.getchannel("A")
+        _, high = alpha.getextrema()
+        assert isinstance(high, (int, float))
+        assert high > 200, kind
+    assert px(images.weather_icon("clear", 40), (20, 20))[:3] == images.SUN[:3]
+    with pytest.raises(ValueError, match="unknown weather icon"):
+        images.weather_icon("hail")
+
+
 def test_build_images(tmp_path: Path) -> None:
     written = images.build_images(tmp_path / "images")
-    assert len(written) == 36 + 6 + 3 + 3
+    assert len(written) == 36 + 6 + 3 + 3 + len(images.WEATHER_KINDS)
     for name in written:
         assert (tmp_path / "images" / name).exists()

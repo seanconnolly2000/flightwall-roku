@@ -9,6 +9,8 @@ sub init()
     m.settingsPanel = m.top.findNode("settingsPanel")
     m.pollTimer = m.top.findNode("pollTimer")
     m.clockTimer = m.top.findNode("clockTimer")
+    m.weatherTimer = m.top.findNode("weatherTimer")
+    m.weatherKey = ""
 
     m.screensaver = false
     m.started = false
@@ -29,13 +31,70 @@ sub init()
     m.flightTask.observeField("result", "onFlightResult")
     m.lookupTask = CreateObject("roSGNode", "LookupTask")
     m.lookupTask.observeField("result", "onLookupResult")
+    m.weatherTask = CreateObject("roSGNode", "WeatherTask")
+    m.weatherTask.observeField("result", "onWeatherResult")
     m.pollTimer.observeField("fire", "onPollTimer")
     m.clockTimer.observeField("fire", "onClockTimer")
+    m.weatherTimer.observeField("fire", "onWeatherTimer")
     m.settingsPanel.observeField("result", "onSettingsResult")
 
-    onClockTimer()
-    m.clockTimer.control = "start"
+    startClock()
     m.top.setFocus(true)
+end sub
+
+' The clock shows minutes only, so wake up once per minute, aligned to the minute.
+sub startClock()
+    m.panel.clock = Format_Now(false)
+    now = CreateObject("roDateTime")
+    now.ToLocalTime()
+    m.clockTimer.control = "stop"
+    m.clockTimer.repeat = false
+    m.clockTimer.duration = 61 - now.GetSeconds()
+    m.clockTimer.control = "start"
+end sub
+
+sub onClockTimer()
+    m.panel.clock = Format_Now(false)
+    if not m.clockTimer.repeat then
+        m.clockTimer.control = "stop"
+        m.clockTimer.repeat = true
+        m.clockTimer.duration = 60
+        m.clockTimer.control = "start"
+    end if
+end sub
+
+' Forecast: fetched once per location, refreshed hourly, retried after ten minutes on failure.
+sub requestWeather()
+    if not Settings_IsConfigured(m.settings) then return
+    key = Util_Str(m.settings.lat) + "," + Util_Str(m.settings.lon)
+    if key = m.weatherKey then return
+    m.weatherKey = key
+    fetchWeather()
+end sub
+
+sub fetchWeather()
+    m.weatherTask.request = { lat: Util_ToFloat(m.settings.lat), lon: Util_ToFloat(m.settings.lon) }
+    m.weatherTask.control = "RUN"
+end sub
+
+sub onWeatherTimer()
+    fetchWeather()
+end sub
+
+sub onWeatherResult()
+    result = m.weatherTask.result
+    if not Util_IsAA(result) then return
+    m.weatherTimer.control = "stop"
+    if result.ok = true then
+        m.panel.weather = { ok: true, days: result.days }
+        logEvent("weather", "Open-Meteo " + result.days.Count().ToStr() + " days")
+        m.weatherTimer.duration = 3600
+    else
+        m.panel.weather = { ok: false, days: [] }
+        logEvent("weather-error", Util_Str(result.message))
+        m.weatherTimer.duration = 600
+    end if
+    m.weatherTimer.control = "start"
 end sub
 
 sub loadStaticData()
@@ -93,12 +152,9 @@ sub logEvent(event as String, detail as String)
     if m.diag.visible then m.diag.lines = m.audit
 end sub
 
-sub onClockTimer()
-    m.panel.clock = Format_Now(false)
-end sub
-
 ' Entry point after launch and after every settings change.
 sub start()
+    m.top.setFocus(true)
     applySettingsToViews()
     if not Settings_IsZipValid(Util_Str(m.settings.zip)) then
         if m.screensaver then
@@ -170,6 +226,7 @@ sub startPolling()
     m.pollTimer.control = "stop"
     m.pollTimer.duration = Settings_PollSeconds(m.settings)
     m.pollTimer.control = "start"
+    requestWeather()
     poll()
 end sub
 
@@ -186,7 +243,7 @@ sub poll()
     radius = Settings_Radius(m.settings)
     provider = Util_Str(m.settings.provider)
     lookups = []
-    if Settings_Flag(m.settings, "routes") then lookups = Routes_Pick(m.aircraft, m.routes, 3)
+    if Settings_Flag(m.settings, "routes") then lookups = Routes_Pick(m.aircraft, m.routes, 2)
     m.flightTask.request = {
         provider: provider
         url: Flights_ProviderUrl(provider, lat, lon, radius)
@@ -215,6 +272,7 @@ sub onFlightResult()
         m.strikes = 0
         m.aircraft = result.aircraft
         if Settings_Flag(m.settings, "hideGround") then m.aircraft = Flights_Airborne(m.aircraft)
+        m.aircraft = Flights_Nearest(m.aircraft, 20)
         if Util_IsAA(result.routes) then
             for each callsign in result.routes
                 m.routes[callsign] = result.routes[callsign]
@@ -255,7 +313,8 @@ sub onFlightResult()
         message: Util_Str(result.message)
         nextSeconds: m.pollTimer.duration
     }
-    if (m.pollCount MOD 6 = 0) or not result.ok then Audit_Save(m.audit)
+    ' Persist the log rarely: registry writes hit flash. Errors and every ten minutes.
+    if (m.pollCount MOD 60 = 0) or not result.ok then Audit_Save(m.audit)
 end sub
 
 function describeError(result as Object, providerName as String, backoff as Integer) as String
@@ -322,6 +381,7 @@ end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
+    ? "[FlightWall] key " + key
     if m.screensaver then return false
     if m.settingsPanel.visible then return false
     if key = "options" or key = "OK" then

@@ -5,6 +5,7 @@
     <field id="result" type="assocarray" alwaysNotify="true"/>
   </interface>
   <script type="text/brightscript" uri="pkg:/source/lib/util.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/lib/http.brs"/>
   <script type="text/brightscript" uri="pkg:/source/lib/geo.brs"/>
   <script type="text/brightscript" uri="pkg:/source/lib/routes.brs"/>
   <script type="text/brightscript" uri="pkg:/source/lib/flights.brs"/>
