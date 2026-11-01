@@ -26,6 +26,8 @@ credentials. Settings are entered once with the remote and kept on the device.
 
 **Privacy policy URL:** https://github.com/seanconnolly2000/flightwall-roku/blob/main/store/PRIVACY.md
 
+**Terms of service URL:** https://github.com/seanconnolly2000/flightwall-roku/blob/main/store/TERMS.md
+
 **Content rating:** All audiences
 
 **Languages:** English
