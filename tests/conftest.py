@@ -179,11 +179,17 @@ def make_channel(root: Path) -> Path:
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<component name="MainScene" extends="Scene">\n'
         '  <script type="text/brightscript" uri="pkg:/components/MainScene.brs"/>\n'
+        '  <script type="text/brightscript" uri="pkg:/components/MainSceneKeys.brs"/>\n'
         "  <children/>\n</component>\n",
         encoding="utf-8",
     )
     (roku / "components" / "MainScene.brs").write_text(
         'sub init()\n    m.top.backgroundColor = "0x000000FF"\nend sub\n', encoding="utf-8"
+    )
+    (roku / "components" / "MainSceneKeys.brs").write_text(
+        "function onKeyEvent(key as String, press as Boolean) as Boolean\n    return false\n"
+        "end function\n",
+        encoding="utf-8",
     )
     return roku
 

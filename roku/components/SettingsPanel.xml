@@ -9,6 +9,7 @@
   <script type="text/brightscript" uri="pkg:/source/lib/util.brs"/>
   <script type="text/brightscript" uri="pkg:/source/lib/settings.brs"/>
   <script type="text/brightscript" uri="pkg:/components/SettingsPanel.brs"/>
+  <script type="text/brightscript" uri="pkg:/components/SettingsPanelKeys.brs"/>
   <children>
     <Rectangle id="backdrop" width="1280" height="720" color="0x000000DD"/>
     <Rectangle id="card" translation="[200, 40]" width="880" height="640" color="0x0D1117FF">

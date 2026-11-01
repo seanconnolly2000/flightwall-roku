@@ -168,11 +168,4 @@ sub onDialogClosed()
     m.list.setFocus(true)
 end sub
 
-function onKeyEvent(key as String, press as Boolean) as Boolean
-    if not press then return false
-    if key = "back" then
-        m.top.result = { saved: false, settings: m.working }
-        return true
-    end if
-    return false
-end function
+' The Back-key handler is in SettingsPanelKeys.brs (channel build only).

@@ -13,6 +13,7 @@
   <script type="text/brightscript" uri="pkg:/source/lib/format.brs"/>
   <script type="text/brightscript" uri="pkg:/source/lib/audit.brs"/>
   <script type="text/brightscript" uri="pkg:/components/MainScene.brs"/>
+  <script type="text/brightscript" uri="pkg:/components/MainSceneKeys.brs"/>
   <children>
     <Rectangle id="background" width="1280" height="720" color="0x000000FF"/>
     <MapView id="map" translation="[10, 10]"/>

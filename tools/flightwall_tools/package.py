@@ -18,6 +18,7 @@ TEST_PATHS = ("source/tests/", "source/testFramework/")
 APP_ENTRY = "source/main.brs"
 SCREENSAVER_ENTRY = "source/screensaver.brs"
 SCREENSAVER_MANIFEST_PREFIX = "screensaver_"
+KEY_HANDLER_SUFFIX = "Keys.brs"  # remote-key handlers; forbidden in screensavers
 SKIP_NAMES = {".DS_Store", "Thumbs.db", ".gitkeep", "LICENSE"}
 
 
@@ -29,9 +30,19 @@ def should_include(
         return False
     if not with_tests and relative.startswith(TEST_PATHS):
         return False
-    if screensaver_only and relative == APP_ENTRY:
+    if screensaver_only and (relative == APP_ENTRY or name.endswith(KEY_HANDLER_SUFFIX)):
         return False
     return not (channel_only and relative == SCREENSAVER_ENTRY)
+
+
+def strip_key_handler_scripts(xml_text: str) -> str:
+    """Remove <script> references to *Keys.brs files from component XML (screensaver build)."""
+    kept = [
+        line
+        for line in xml_text.splitlines()
+        if not ("<script" in line and KEY_HANDLER_SUFFIX in line)
+    ]
+    return "\n".join(kept).rstrip("\n") + "\n"
 
 
 def strip_screensaver_manifest(text: str) -> str:
@@ -80,6 +91,8 @@ def build_package(
                 zf.writestr(relative, strip_screensaver_manifest(file.read_text(encoding="utf-8")))
             elif screensaver_only and relative == "manifest":
                 zf.writestr(relative, screensaver_manifest(file.read_text(encoding="utf-8")))
+            elif screensaver_only and relative.endswith(".xml"):
+                zf.writestr(relative, strip_key_handler_scripts(file.read_text(encoding="utf-8")))
             else:
                 zf.write(file, relative)
             included.append(relative)

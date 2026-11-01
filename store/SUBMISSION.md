@@ -61,6 +61,15 @@ side-loading. Uploading the screensaver package while its manifest still had `ti
 produced "Channel type is channel but Main() ... is missing" plus three "in-channel screensaver"
 errors.
 
+Screensavers may not handle remote keys at all: static analysis reports "Your screensaver is
+using a prohibited OnKeyEvent() method" for any `onKeyEvent` function in the package. The key
+handlers therefore live in `components/*Keys.brs` files, which the screensaver build leaves out
+(and whose `<script>` references it removes from the component XML).
+
+The dashboard's App type menu has no "Screensaver" entry, so static analysis on a screensaver
+package shows the warning "Channel type mismatch: Channel Store reports App, package detected as
+Screensaver". It is a warning, not an error; the package type is what Roku uses.
+
 Other static-analysis requirements already met by the current manifest and code: `rsg_version=1.3`
 with minimum Roku OS 15.1, no `subtitle` attribute, no `InitClientCertificates()`, and the
 roAppMemoryMonitor / low-memory event integration (mandatory for certification since
