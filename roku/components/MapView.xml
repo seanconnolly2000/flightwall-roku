@@ -25,6 +25,6 @@
       <Poster id="home" uri="pkg:/images/home.png" width="14" height="14" translation="[-7, -7]"/>
       <Poster id="mask" uri="pkg:/images/mask.png" width="700" height="700" translation="[-350, -350]"/>
     </Group>
-    <Label id="radiusLabel" translation="[14, 668]" color="0x6E7681FF"/>
+    <Label id="radiusLabel" translation="[40, 640]" color="0x6E7681FF"/>
   </children>
 </component>

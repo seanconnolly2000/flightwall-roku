@@ -26,18 +26,18 @@ sub init()
     m.statusLabel = m.top.findNode("statusLabel")
     m.hintLabel = m.top.findNode("hintLabel")
 
-    m.clockLabel.font = panelFont(true, 52)
-    m.dateLabel.font = panelFont(false, 20)
-    m.locationLabel.font = panelFont(false, 20)
-    m.radiusLabel.font = panelFont(false, 18)
-    m.heroCallsign.font = panelFont(true, 36)
-    m.heroAirline.font = panelFont(false, 20)
-    m.heroType.font = panelFont(false, 17)
+    m.clockLabel.font = panelFont(true, 46)
+    m.dateLabel.font = panelFont(false, 18)
+    m.locationLabel.font = panelFont(false, 18)
+    m.radiusLabel.font = panelFont(false, 16)
+    m.heroCallsign.font = panelFont(true, 32)
+    m.heroAirline.font = panelFont(false, 19)
+    m.heroType.font = panelFont(false, 16)
     m.top.findNode("overheadLabel").font = panelFont(true, 15)
-    m.heroRoute.font = panelFont(true, 30)
-    m.heroCities.font = panelFont(false, 18)
-    m.heroStats1.font = panelFont(false, 20)
-    m.heroStats2.font = panelFont(false, 18)
+    m.heroRoute.font = panelFont(true, 27)
+    m.heroCities.font = panelFont(false, 17)
+    m.heroStats1.font = panelFont(false, 19)
+    m.heroStats2.font = panelFont(false, 17)
     m.listTitle.font = panelFont(true, 14)
     m.weatherTitle.font = panelFont(true, 14)
     m.weatherSource.font = panelFont(false, 13)
@@ -49,7 +49,7 @@ sub init()
     rowFontMain = panelFont(true, 19)
     rowFontDetail = panelFont(false, 16)
     for i = 0 to 3
-        y = i * 30
+        y = i * 28
         logo = m.listGroup.createChild("Poster")
         logo.translation = [0, y + 2]
         logo.width = 20
@@ -148,7 +148,7 @@ sub refreshHint()
     if m.top.screensaver then
         setText(m.hintLabel, "FlightWall screensaver  -  any button exits  -  settings: Settings > Theme > Screensavers > FlightWall")
     else
-        setText(m.hintLabel, "Press * for settings (ZIP, radius, data source)    Play: activity log    Up/Down: radius")
+        setText(m.hintLabel, "Press * for settings    Play: activity log    Up/Down: radius")
     end if
 end sub
 

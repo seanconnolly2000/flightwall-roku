@@ -18,32 +18,32 @@
   <script type="text/brightscript" uri="pkg:/source/lib/weather.brs"/>
   <script type="text/brightscript" uri="pkg:/components/InfoPanel.brs"/>
   <children>
-    <Label id="clockLabel" translation="[0, 18]" color="0xFFFFFFFF"/>
-    <Label id="dateLabel" translation="[0, 80]" color="0x8B949EFF"/>
-    <Label id="locationLabel" translation="[0, 112]" width="520" color="0xE6EDF3FF"/>
-    <Label id="radiusLabel" translation="[0, 136]" width="520" color="0x8B949EFF"/>
-    <Rectangle id="heroCard" translation="[0, 172]" width="520" height="240" color="0x161B22FF">
-      <Poster id="heroLogo" translation="[16, 16]" width="56" height="56" loadDisplayMode="scaleToFit"/>
-      <Label id="heroCallsign" translation="[88, 10]" width="300" color="0xFFFFFFFF"/>
-      <Label id="heroAirline" translation="[88, 54]" width="416" color="0xC9D1D9FF"/>
-      <Label id="heroType" translation="[88, 80]" width="416" color="0x8B949EFF"/>
-      <Rectangle id="overheadBadge" translation="[384, 14]" width="120" height="28" color="0xDA3633FF" visible="false">
+    <Label id="clockLabel" translation="[0, 16]" color="0xFFFFFFFF"/>
+    <Label id="dateLabel" translation="[0, 70]" color="0x8B949EFF"/>
+    <Label id="locationLabel" translation="[0, 98]" width="520" color="0xE6EDF3FF"/>
+    <Label id="radiusLabel" translation="[0, 120]" width="520" color="0x8B949EFF"/>
+    <Rectangle id="heroCard" translation="[0, 150]" width="520" height="226" color="0x161B22FF">
+      <Poster id="heroLogo" translation="[16, 14]" width="52" height="52" loadDisplayMode="scaleToFit"/>
+      <Label id="heroCallsign" translation="[84, 8]" width="300" color="0xFFFFFFFF"/>
+      <Label id="heroAirline" translation="[84, 50]" width="420" color="0xC9D1D9FF"/>
+      <Label id="heroType" translation="[84, 74]" width="420" color="0x8B949EFF"/>
+      <Rectangle id="overheadBadge" translation="[384, 12]" width="120" height="28" color="0xDA3633FF" visible="false">
         <Label id="overheadLabel" translation="[0, 0]" width="120" height="28" horizAlign="center" vertAlign="center" color="0xFFFFFFFF" text="OVERHEAD"/>
       </Rectangle>
-      <Label id="heroRoute" translation="[16, 114]" width="488" color="0xFFFFFFFF"/>
-      <Label id="heroCities" translation="[16, 152]" width="488" color="0x8B949EFF"/>
-      <Label id="heroStats1" translation="[16, 182]" width="488" color="0xE6EDF3FF"/>
-      <Label id="heroStats2" translation="[16, 208]" width="488" color="0x8B949EFF"/>
+      <Label id="heroRoute" translation="[16, 106]" width="488" color="0xFFFFFFFF"/>
+      <Label id="heroCities" translation="[16, 142]" width="488" color="0x8B949EFF"/>
+      <Label id="heroStats1" translation="[16, 170]" width="488" color="0xE6EDF3FF"/>
+      <Label id="heroStats2" translation="[16, 194]" width="488" color="0x8B949EFF"/>
     </Rectangle>
-    <Label id="listTitle" translation="[0, 422]" color="0x8B949EFF" text="ALSO NEARBY"/>
-    <Group id="listGroup" translation="[0, 444]"/>
-    <Label id="weatherTitle" translation="[0, 574]" color="0x8B949EFF" text="5-DAY FORECAST" visible="false"/>
-    <Label id="weatherSource" translation="[0, 574]" width="520" horizAlign="right" color="0x484F58FF" text="weather: Open-Meteo.com" visible="false"/>
-    <Group id="weatherGroup" translation="[0, 594]"/>
-    <Rectangle id="bannerBox" translation="[0, 420]" width="520" height="144" color="0x3B2F00FF" visible="false">
-      <Label id="bannerLabel" translation="[12, 10]" width="496" height="124" wrap="true" color="0xFFD166FF"/>
+    <Label id="listTitle" translation="[0, 386]" color="0x8B949EFF" text="ALSO NEARBY"/>
+    <Group id="listGroup" translation="[0, 406]"/>
+    <Label id="weatherTitle" translation="[0, 528]" color="0x8B949EFF" text="5-DAY FORECAST" visible="false"/>
+    <Label id="weatherSource" translation="[0, 528]" width="520" horizAlign="right" color="0x484F58FF" text="weather: Open-Meteo.com" visible="false"/>
+    <Group id="weatherGroup" translation="[0, 548]"/>
+    <Rectangle id="bannerBox" translation="[0, 384]" width="520" height="136" color="0x3B2F00FF" visible="false">
+      <Label id="bannerLabel" translation="[12, 10]" width="496" height="116" wrap="true" color="0xFFD166FF"/>
     </Rectangle>
-    <Label id="statusLabel" translation="[0, 676]" width="520" color="0x6E7681FF"/>
-    <Label id="hintLabel" translation="[0, 698]" width="520" color="0x8B949EFF"/>
+    <Label id="statusLabel" translation="[0, 636]" width="520" color="0x6E7681FF"/>
+    <Label id="hintLabel" translation="[0, 658]" width="520" color="0x8B949EFF"/>
   </children>
 </component>
