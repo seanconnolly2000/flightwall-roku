@@ -4,6 +4,12 @@ A Roku channel **and screensaver** that shows the aircraft flying around your ho
 minimal dark map, inspired by [OpenFlightWall](https://github.com/dilshanonline/OpenFlightWall)
 and [TheFlightWall](https://github.com/AxisNimble/TheFlightWall_OSS).
 
+![FlightWall on a Roku: the San Francisco Bay Area with nearby flights, the nearest flight's airline, route and altitude, other aircraft, and a five-day forecast](store/screenshots/flightwall-1.jpg)
+
+| Nearest flight, routes and logos | Settings screen (first run) |
+|---|---|
+| ![A second view with a Frontier flight to Los Angeles as the nearest aircraft](store/screenshots/flightwall-2.jpg) | ![The settings screen: ZIP code, radius, data source, OpenSky credentials, poll interval and display options](store/screenshots/flightwall-settings.jpg) |
+
 - **Minimal map built for older sticks**: land is black, water is dark blue, with major
   airports and city labels for orientation. The map is pre-rendered into small tiles at
   build time, so the Roku only places a few images instead of drawing geometry.
