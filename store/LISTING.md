@@ -40,12 +40,18 @@ credentials. Settings are entered once with the remote and kept on the device.
 
 **Artwork:**
 
-| Asset | File | Size |
+The dashboard asks for two different kinds of image. Match the size it names in the error to the
+file below.
+
+| Dashboard slot | File | Size |
 |---|---|---|
-| Channel poster FHD | `roku/images/icon_focus_fhd.png` | 540 x 405 |
-| Channel poster HD | `roku/images/icon_focus_hd.png` | 290 x 218 |
-| Channel poster SD | `roku/images/icon_focus_sd.png` | 246 x 140 |
+| Channel poster, FHD (the store tile) | `store/artwork/poster-540x405.png` | 540 x 405 |
+| Channel poster, HD | `store/artwork/poster-290x218.png` | 290 x 218 |
+| Channel poster, SD | `store/artwork/poster-246x140.png` | 246 x 140 |
 | Screenshots (16:9) | `store/screenshots/flightwall-1.jpg`, `flightwall-2.jpg`, `flightwall-settings.jpg` | 1920 x 1080 |
+
+The posters are the same artwork the channel ships as its home-screen icons
+(`roku/images/icon_focus_*.png`), flattened to opaque PNG.
 
 Use the files in `store/screenshots/` only. Anything in `dist/` is a build artifact; `flightwall
 screenshot` now always writes 1920 x 1080, so new captures can go straight into `store/screenshots/`.
