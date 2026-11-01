@@ -47,4 +47,5 @@ after a change means you accept the updated terms.
 
 ## 7. Contact
 
-Open an issue at <https://github.com/seanconnolly2000/flightwall-roku/issues>.
+Email <mranonymous2000@yahoo.com> or open an issue at
+<https://github.com/seanconnolly2000/flightwall-roku/issues>.

@@ -28,6 +28,10 @@ credentials. Settings are entered once with the remote and kept on the device.
 
 **Terms of service URL:** https://github.com/seanconnolly2000/flightwall-roku/blob/main/store/TERMS.md
 
+**Support URL:** https://github.com/seanconnolly2000/flightwall-roku/blob/main/store/SUPPORT.md
+
+**Support email:** mranonymous2000@yahoo.com
+
 **Content rating:** All audiences
 
 **Languages:** English

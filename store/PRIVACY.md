@@ -40,4 +40,5 @@ The complete source code is available at
 
 ## Contact
 
-Open an issue at <https://github.com/seanconnolly2000/flightwall-roku/issues>.
+Email <mranonymous2000@yahoo.com> or open an issue at
+<https://github.com/seanconnolly2000/flightwall-roku/issues>.

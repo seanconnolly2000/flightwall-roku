@@ -215,6 +215,11 @@ docker run --rm -v "$PWD:/work" -e ROKU_DEV_PASSWORD flightwall-tools deploy --h
 - **Supply chain**: the only third-party code on the device is Roku's own unit-testing framework
   (test build only). Python dependencies are pinned in `uv.lock`.
 
+## Support
+
+End-user setup and troubleshooting live in [store/SUPPORT.md](store/SUPPORT.md). Support email:
+<mranonymous2000@yahoo.com>.
+
 ## Publishing to the Roku Channel Store
 
 Everything needed for a submission lives under `store/`: the listing text, a privacy policy,
