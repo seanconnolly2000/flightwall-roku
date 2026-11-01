@@ -30,6 +30,9 @@ class FakeSocket:
     def recv(self, size: int, /) -> bytes:
         return self.chunks.pop(0) if self.chunks else b""
 
+    def send(self, data: bytes, /) -> int:
+        return len(data)
+
     def close(self) -> None:
         return None
 
@@ -38,16 +41,22 @@ def fake_factory(
     installer_html: str = "<p>Install Success.</p>",
     console: str = TEST_OUTPUT,
     image_bytes: bytes = b"\xff\xd8jpeg",
+    package_bytes: bytes = b"PKG" * 500,
 ) -> cli.DeviceFactory:
     def factory(host: str, password: str) -> RokuDevice:
         assert password == "pw"
 
         def opener(request: urllib.request.Request) -> device.HttpResponse:
+            url = request.full_url
             if request.get_method() == "GET":
                 if request.get_header("Authorization") is not None:
+                    if url.endswith(".pkg"):
+                        return device.HttpResponse(200, {}, package_bytes)
                     return device.HttpResponse(200, {}, image_bytes)
                 challenge = 'Digest qop="auth", realm="rokudev", nonce="1"'
                 return device.HttpResponse(401, {"www-authenticate": challenge}, b"")
+            if url.endswith("/plugin_package"):
+                return device.HttpResponse(200, {}, b'<a href="pkgs/FlightWall.pkg">pkg</a>')
             return device.HttpResponse(200, {}, installer_html.encode())
 
         return RokuDevice(
@@ -249,6 +258,70 @@ def test_screenshot_command(project: Path, capsys: pytest.CaptureFixture[str]) -
         == 1
     )
     assert "Screenshot failed" in capsys.readouterr().out
+
+
+def test_genkey_and_sign_commands(project: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    keyed = fake_factory(
+        console="Generating developer key...\r\nPassword: s3cret\r\nDevID: abc123\r\n"
+    )
+    assert run("genkey", "--host", "h", "--password", "pw", root=project, factory=keyed) == 0
+    out = capsys.readouterr().out
+    assert "DevID:    abc123" in out
+    assert "Password: s3cret" in out
+    assert (
+        run("genkey", "--host", "h", "--password", "pw", root=project, factory=fake_factory()) == 1
+    )
+    assert "genkey failed" in capsys.readouterr().out
+
+    assert (
+        run(
+            "sign",
+            "--host",
+            "h",
+            "--password",
+            "pw",
+            "--signing-password",
+            "s3cret",
+            root=project,
+            factory=fake_factory(),
+        )
+        == 0
+    )
+    assert (project / "dist" / "flightwall-screensaver.pkg").read_bytes() == b"PKG" * 500
+    assert "Saved signed package" in capsys.readouterr().out
+    custom = project / "custom.pkg"
+    assert (
+        run(
+            "sign",
+            "--host",
+            "h",
+            "--password",
+            "pw",
+            "--signing-password",
+            "s3cret",
+            "--out",
+            str(custom),
+            root=project,
+            factory=fake_factory(),
+        )
+        == 0
+    )
+    assert custom.exists()
+    assert (
+        run(
+            "sign",
+            "--host",
+            "h",
+            "--password",
+            "pw",
+            "--signing-password",
+            "s3cret",
+            root=project,
+            factory=fake_factory(package_bytes=b"short"),
+        )
+        == 1
+    )
+    assert "Signing failed" in capsys.readouterr().out
 
 
 def test_commands_refuse_broken_channel(project: Path, capsys: pytest.CaptureFixture[str]) -> None:

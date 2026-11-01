@@ -27,6 +27,12 @@ ECP_PORT = 8060
 CONSOLE_PORT = 8085
 INSTALLER_PATH = "/plugin_install"
 INSPECT_PATH = "/plugin_inspect"
+PACKAGE_PATH = "/plugin_package"
+GENKEY_PORT = 8080
+GENKEY_PASSWORD = re.compile(r"Password:\s*(\S+)")
+GENKEY_DEVID = re.compile(r"DevID:\s*([0-9A-Fa-f]+)")
+PACKAGE_LINK = re.compile(r"(pkgs/[^\"'<>\s]+\.pkg)")
+MIN_PACKAGE_BYTES = 1000
 SCREENSHOT_PATH = "/pkgs/dev.jpg"
 SCREENSHOT_IMAGE = re.compile(r"(pkgs/dev\.(?:jpg|png))")
 IMAGE_MAGIC = (b"\xff\xd8", b"\x89PNG")
@@ -49,7 +55,14 @@ class ConsoleSocket(Protocol):
     def connect(self, address: tuple[str, int], /) -> None: ...
     def settimeout(self, timeout: float | None, /) -> None: ...
     def recv(self, size: int, /) -> bytes: ...
+    def send(self, data: bytes, /) -> int: ...
     def close(self) -> None: ...
+
+
+@dataclass(frozen=True)
+class SigningKey:
+    dev_id: str
+    password: str
 
 
 @dataclass(frozen=True)
@@ -259,6 +272,46 @@ class RokuDevice:
             raise DeviceError(msg)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_bytes(image.body)
+        return out_path
+
+    def genkey(self, timeout: float = 90.0) -> SigningKey:
+        """Generate a new package-signing key on the device (the 'genkey' console command).
+
+        Run this once per device and keep the password: every later package for the same
+        channel must be signed with the same key.
+        """
+        sock = self._socket_factory()
+        sock.settimeout(1.0)
+        sock.connect((self.host, GENKEY_PORT))
+        sock.send(b"genkey\r\n")
+        text = self.read_console(sock, timeout, "DevID:")
+        password = GENKEY_PASSWORD.search(text)
+        dev_id = GENKEY_DEVID.search(text)
+        if password is None or dev_id is None:
+            msg = f"genkey did not return a key: {' '.join(text.split())[-300:]}"
+            raise DeviceError(msg)
+        return SigningKey(dev_id.group(1), password.group(1))
+
+    def sign(self, app_name: str, signing_password: str, out_path: Path) -> Path:
+        """Sign the currently side-loaded channel and save the .pkg (installer 'Package' action)."""
+        fields = {
+            "mysubmit": "Package",
+            "app_name": app_name,
+            "passwd": signing_password,
+            "pkg_time": str(int(time.time())),
+        }
+        content_type, body = encode_multipart(fields, None, "", b"")
+        page = self._digest_request("POST", PACKAGE_PATH, body, content_type)
+        match = PACKAGE_LINK.search(page.text)
+        if match is None:
+            msg = f"packaging failed: {summarize_installer_response(page.text)}"
+            raise DeviceError(msg)
+        package = self._digest_request("GET", "/" + match.group(1))
+        if len(package.body) < MIN_PACKAGE_BYTES or package.body.lstrip().startswith(b"<"):
+            msg = "the Roku did not return a signed package"
+            raise DeviceError(msg)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_bytes(package.body)
         return out_path
 
     def install(self, archive: Path) -> str:

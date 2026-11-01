@@ -209,6 +209,50 @@ docker run --rm -v "$PWD:/work" -e ROKU_DEV_PASSWORD flightwall-tools deploy --h
 - **Supply chain**: the only third-party code on the device is Roku's own unit-testing framework
   (test build only). Python dependencies are pinned in `uv.lock`.
 
+## Publishing to the Roku Channel Store
+
+Everything needed for a submission lives under `store/`: the listing text, a privacy policy,
+FHD screenshots and a step-by-step guide (`store/SUBMISSION.md`). The tooling can generate the
+device signing key and produce the signed package:
+
+```bash
+uv run flightwall genkey --host <roku-ip>                       # once; save the password it prints
+uv run flightwall deploy --host <roku-ip> --screensaver-only    # the store build has no Main()
+uv run flightwall sign --host <roku-ip> --signing-password <genkey password> --app-name FlightWall/1.0
+```
+
+The signed `.pkg` lands in `dist/`. Uploading it, filling in the listing and passing Roku's
+certification review happen in the Roku Developer Dashboard under your own account.
+
+## Credits and licenses
+
+FlightWall is released under the [MIT License](LICENSE). It was written from scratch for Roku,
+but its design follows two open-source projects, both licensed under the Apache License 2.0:
+
+- **[OpenFlightWall](https://github.com/dilshanonline/OpenFlightWall)** by Dilshan Wijesooriya.
+  The keyless data-source selection (OpenSky and adsbdb), the free-bucket-first approach to
+  optional OpenSky credentials, the nearest-flight hero card, the always-on "wall mode" idea and
+  the airline-logo CDN all come from studying its code. No code was copied.
+- **[TheFlightWall](https://github.com/AxisNimble/TheFlightWall_OSS)** by AxisNimble, the LED
+  flight wall that inspired OpenFlightWall in turn.
+
+Bundled third-party code: the
+[Roku Unit Testing Framework](https://gitlab.com/rokudev/unit-testing-framework),
+Copyright 2016 Roku, Inc., Apache License 2.0 (`roku/source/testFramework/`, test builds only).
+
+Data and services, with their terms:
+
+| Source | License / terms |
+|---|---|
+| [Natural Earth](https://www.naturalearthdata.com/about/terms-of-use/) coastlines, lakes, cities | Public domain |
+| [OurAirports](https://ourairports.com/data/) airports | Public domain |
+| [US Census Bureau](https://www.census.gov/geo/maps-data/data/gazetteer-files.html) ZIP centroids | US government work, public domain |
+| [adsb.lol](https://github.com/adsblol/api), [adsb.fi](https://github.com/adsbfi/opendata) aircraft positions | Community-run, free, dynamic rate limits |
+| [OpenSky Network](https://opensky-network.org/about/terms-of-use) aircraft positions | Free for non-commercial use under OpenSky's terms |
+| [adsbdb.com](https://www.adsbdb.com/) routes and airlines | Community-run, free |
+| [Open-Meteo](https://open-meteo.com/en/terms) forecasts | CC BY 4.0; attribution shown on screen |
+| Airline logos via `images.kiwi.com` | Public CDN; logos remain trademarks of their airlines |
+
 ## Troubleshooting
 
 - **"Install Failure" on deploy**: the Roku prints the compile error in its web installer and on

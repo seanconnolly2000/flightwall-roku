@@ -1,0 +1,69 @@
+# Submitting FlightWall to the Roku Channel Store
+
+Publishing is done in the Roku Developer Dashboard under the account that owns the channel, and
+every public channel goes through Roku's certification review (typically one to three weeks).
+The steps below prepare everything that can be prepared from this repository and then walk
+through the dashboard.
+
+## 1. Developer account
+
+1. Sign in at <https://developer.roku.com/> with the Roku account the device is linked to and
+   enroll in the (free) Roku Developer Program, accepting the agreement.
+2. Keep the device in developer mode (it already is).
+
+## 2. Signing key and signed package
+
+A store package must be signed by a key generated on your Roku. Generate it once and keep the
+password: every future update must be signed with the same key.
+
+```bash
+uv run flightwall genkey --host <roku-ip>
+```
+
+Save the printed **password** and **DevID** somewhere safe (a password manager). Then build the
+screensaver package (Roku rejects screensavers that also have a `Main()` entry point), install it,
+and sign it:
+
+```bash
+uv run flightwall deploy --host <roku-ip> --screensaver-only
+uv run flightwall sign --host <roku-ip> --signing-password <genkey password> --app-name FlightWall/1.0
+uv run flightwall deploy --host <roku-ip>        # optional: put the interactive build back
+```
+
+`sign` saves `dist/flightwall-screensaver.pkg`. Bump `major_version` / `minor_version` /
+`build_version` in `roku/manifest` for every submission.
+
+## 3. Dashboard
+
+In the Developer Dashboard choose **Manage My Channels > Add Channel > Developer SDK**, then:
+
+1. **Properties**: name FlightWall; classification Screensaver; language English; countries United States.
+2. **Channel Store Info**: paste the text from `store/LISTING.md`, upload the channel posters
+   (`roku/images/icon_focus_*.png`), the screenshots in `store/screenshots/`, and the privacy
+   policy URL. Content rating: all audiences.
+3. **Monetization**: none.
+4. **Package Upload**: upload `dist/flightwall-screensaver.pkg`, set the version (match the
+   manifest) and minimum firmware (Roku OS 11 or later is a safe floor; the app uses
+   StandardKeyboardDialog, which needs OS 10+).
+5. **Static Analysis**: run it and fix anything it flags.
+6. **Preview and Publish**: review, then **Submit for publishing**. Roku emails the result.
+
+## 4. Things certification is likely to ask about
+
+- **Screensaver rules**: no user input, no video or audio. FlightWall's screensaver build meets
+  this; its settings live in the separate "Change screensaver settings" screen
+  (`RunScreenSaverSettings`).
+- **Third-party services**: Roku asks publishers to have the right to use the services an app
+  depends on. The ADS-B feeds are community projects with dynamic limits and may ask a public app
+  to self-host or throttle; OpenSky's data is free for non-commercial use only; the airline-logo
+  CDN belongs to Kiwi.com and is not a documented public API. Consider contacting adsb.lol before
+  a public release, and consider shipping the store build with logos off by default.
+- **Privacy policy**: `store/PRIVACY.md` describes exactly what the app stores and sends; it
+  must be reachable at a public URL, which the GitHub link provides once the repo is public.
+- **Idle behavior**: screensavers run until a key press; the channel build is subject to Roku's
+  two-hour idle exit like every other channel.
+
+## 5. Updates
+
+Bump the manifest version, rebuild, re-sign with the same key, upload the new package, and
+submit. Certification is required again for each public update.

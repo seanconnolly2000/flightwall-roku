@@ -64,6 +64,7 @@ ignore = [
     "ARG002",
     "ARG005",
     "FBT003",  # positional booleans mirror the signatures under test
+    "PLR0911", # fake device openers branch on the request path
 ]
 
 [tool.ruff.format]

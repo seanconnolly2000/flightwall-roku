@@ -3,7 +3,7 @@
 #
 #   docker build -t flightwall-tools .
 #   docker run --rm -v "$PWD:/work" flightwall-tools all
-#   docker run --rm -v "$PWD:/work" -e ROKU_DEV_PASSWORD flightwall-tools deploy --host 192.168.1.238
+#   docker run --rm -v "$PWD:/work" -e ROKU_DEV_PASSWORD flightwall-tools deploy --host <roku-ip>
 
 FROM python:3.12-slim
 

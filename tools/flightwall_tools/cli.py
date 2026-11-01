@@ -187,6 +187,32 @@ def cmd_screenshot(args: argparse.Namespace, paths: Paths, factory: DeviceFactor
     return 0
 
 
+def cmd_genkey(args: argparse.Namespace, _paths: Paths, factory: DeviceFactory) -> int:
+    device = factory(args.host, resolve_password(args.password))
+    try:
+        key = device.genkey()
+    except DeviceError as exc:
+        print(f"genkey failed: {exc}")
+        return 1
+    print("Signing key generated on the Roku. Save both values now; every future package")
+    print("for this channel must be signed with the same key.")
+    print(f"  DevID:    {key.dev_id}")
+    print(f"  Password: {key.password}")
+    return 0
+
+
+def cmd_sign(args: argparse.Namespace, paths: Paths, factory: DeviceFactory) -> int:
+    device = factory(args.host, resolve_password(args.password))
+    out_path = Path(args.out) if args.out else paths.dist / "flightwall-screensaver.pkg"
+    try:
+        saved = device.sign(args.app_name, args.signing_password, out_path)
+    except DeviceError as exc:
+        print(f"Signing failed: {exc}")
+        return 1
+    print(f"Saved signed package {saved} ({saved.stat().st_size} bytes)")
+    return 0
+
+
 def cmd_delete(args: argparse.Namespace, _paths: Paths, factory: DeviceFactory) -> int:
     device = factory(args.host, resolve_password(args.password))
     try:
@@ -267,6 +293,17 @@ def build_parser() -> argparse.ArgumentParser:
     _add_device_args(p)
     p.add_argument("--out", help="image path (default dist/screenshot.jpg)")
 
+    p = sub.add_parser("genkey", help="generate the package-signing key on the Roku (once)")
+    _add_device_args(p)
+
+    p = sub.add_parser("sign", help="sign the installed channel and download the .pkg")
+    _add_device_args(p)
+    p.add_argument("--signing-password", required=True, help="password printed by genkey")
+    p.add_argument(
+        "--app-name", default="FlightWall/1.0", help="name/version embedded in the package"
+    )
+    p.add_argument("--out", help="output path (default dist/flightwall-screensaver.pkg)")
+
     p = sub.add_parser("delete", help="remove the side-loaded channel from the Roku")
     _add_device_args(p)
 
@@ -289,6 +326,8 @@ def main(argv: Sequence[str] | None = None, factory: DeviceFactory = make_device
         "deploy": cmd_deploy,
         "run-tests": cmd_run_tests,
         "screenshot": cmd_screenshot,
+        "genkey": cmd_genkey,
+        "sign": cmd_sign,
         "delete": cmd_delete,
     }
     if args.command in simple:

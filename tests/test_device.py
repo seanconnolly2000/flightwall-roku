@@ -39,6 +39,10 @@ class FakeSocket:
             raise TimeoutError
         return self.chunks.pop(0) if self.chunks else b""
 
+    def send(self, data: bytes, /) -> int:
+        self.sent = data
+        return len(data)
+
     def close(self) -> None:
         self.closed = True
 
@@ -62,6 +66,8 @@ def make_device(
     post_status: int = 200,
     inspect_html: str = '<img src="pkgs/dev.png?time=1">',
     image_bytes: bytes = b"\x89PNGfake",
+    package_html: str = '<a href="pkgs/FlightWall.pkg">download</a>',
+    package_bytes: bytes = b"PKG" * 500,
 ) -> tuple[device.RokuDevice, list[urllib.request.Request]]:
     requests: list[urllib.request.Request] = []
 
@@ -76,6 +82,10 @@ def make_device(
             return device.HttpResponse(post_status, {}, installer_html.encode())
         if url.endswith("/plugin_inspect"):
             return device.HttpResponse(200, {}, inspect_html.encode())
+        if url.endswith("/plugin_package"):
+            return device.HttpResponse(200, {}, package_html.encode())
+        if url.endswith(".pkg"):
+            return device.HttpResponse(200, {}, package_bytes)
         if "/pkgs/dev." in url:
             return device.HttpResponse(200, {}, image_bytes)
         return device.HttpResponse(200, {}, b"")
@@ -219,6 +229,41 @@ def test_screenshot(tmp_path: Path) -> None:
     dev, _ = make_device(image_bytes=b"<html>not an image</html>")
     with pytest.raises(device.DeviceError, match="did not return a screenshot"):
         dev.screenshot(tmp_path / "c.jpg")
+
+
+def test_genkey() -> None:
+    sock = FakeSocket(
+        [b"Generating developer key...\r\nPassword: s3cret\r\n", b"DevID: deadbeef01\r\n"]
+    )
+    dev, _ = make_device(sock=sock, clock=FakeClock(0.5))
+    key = dev.genkey(timeout=30)
+    assert key == device.SigningKey("deadbeef01", "s3cret")
+    assert sock.address == ("10.0.0.5", 8080)
+    assert sock.sent == b"genkey\r\n"
+    assert sock.closed
+    dev, _ = make_device(sock=FakeSocket([b"nothing useful\r\n"]), clock=FakeClock(0.5))
+    with pytest.raises(device.DeviceError, match="did not return a key"):
+        dev.genkey(timeout=3)
+
+
+def test_sign(tmp_path: Path) -> None:
+    dev, requests = make_device()
+    out = dev.sign("FlightWall/1.0", "s3cret", tmp_path / "out" / "fw.pkg")
+    assert out.read_bytes() == b"PKG" * 500
+    post = requests[1]
+    assert post.full_url == "http://10.0.0.5:80/plugin_package"
+    post_body = post.data
+    assert isinstance(post_body, bytes)
+    assert b'name="app_name"\r\n\r\nFlightWall/1.0' in post_body
+    assert b'name="passwd"\r\n\r\ns3cret' in post_body
+    assert requests[3].full_url == "http://10.0.0.5:80/pkgs/FlightWall.pkg"
+
+    dev, _ = make_device(package_html="<p>Failed: wrong password</p>")
+    with pytest.raises(device.DeviceError, match="packaging failed"):
+        dev.sign("FlightWall/1.0", "bad", tmp_path / "a.pkg")
+    dev, _ = make_device(package_bytes=b"<html>oops</html>")
+    with pytest.raises(device.DeviceError, match="did not return a signed package"):
+        dev.sign("FlightWall/1.0", "s3cret", tmp_path / "b.pkg")
 
 
 def test_ecp_commands() -> None:
