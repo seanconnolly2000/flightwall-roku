@@ -16,7 +16,7 @@ from .airports import build_airports
 from .brscheck import check_channel
 from .cities import DEFAULT_MIN_POPULATION, build_cities
 from .device import DeviceError, RokuDevice, run_device_tests
-from .images import build_images
+from .images import build_images, ensure_fhd
 from .package import build_package
 from .sources import SOURCES, ensure
 from .tiles import DEFAULT_REGIONS, PX_PER_DEG, REGIONS, build_tiles
@@ -230,7 +230,8 @@ def cmd_screenshot(args: argparse.Namespace, paths: Paths, factory: DeviceFactor
     except DeviceError as exc:
         print(f"Screenshot failed: {exc}")
         return 1
-    print(f"Saved {saved}")
+    width, height = ensure_fhd(saved)
+    print(f"Saved {saved} ({width}x{height})")
     return 0
 
 

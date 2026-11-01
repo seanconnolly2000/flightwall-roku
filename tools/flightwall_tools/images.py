@@ -213,6 +213,22 @@ def branded_panel(width: int, height: int, subtitle: str = "") -> Image.Image:
     return canvas
 
 
+FHD = (1920, 1080)
+
+
+def ensure_fhd(path: Path, size: tuple[int, int] = FHD) -> tuple[int, int]:
+    """Rewrite an image at exactly 1920x1080 (the Channel Store screenshot size)."""
+    with Image.open(path) as source:
+        image = source.convert("RGB")
+    if image.size != size:
+        image = image.resize(size, Image.Resampling.LANCZOS)
+    if path.suffix.lower() in {".jpg", ".jpeg"}:
+        image.save(path, format="JPEG", quality=92)
+    else:
+        image.save(path)
+    return image.size
+
+
 def build_images(images_dir: Path) -> list[str]:
     """Write every generated image under images_dir and return the file names written."""
     written: list[str] = []

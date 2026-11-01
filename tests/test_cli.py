@@ -7,8 +7,9 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from PIL import Image
 
-from conftest import fake_sources, make_channel
+from conftest import fake_sources, make_channel, tiny_jpeg
 from flightwall_tools import cli, device
 from flightwall_tools.device import RokuDevice
 
@@ -41,7 +42,7 @@ class FakeSocket:
 def fake_factory(
     installer_html: str = "<p>Install Success.</p>",
     console: str = TEST_OUTPUT,
-    image_bytes: bytes = b"\xff\xd8jpeg",
+    image_bytes: bytes = b"",
     package_bytes: bytes = b"PKG" * 500,
 ) -> cli.DeviceFactory:
     def factory(host: str, password: str) -> RokuDevice:
@@ -53,7 +54,7 @@ def fake_factory(
                 if request.get_header("Authorization") is not None:
                     if url.endswith(".pkg"):
                         return device.HttpResponse(200, {}, package_bytes)
-                    return device.HttpResponse(200, {}, image_bytes)
+                    return device.HttpResponse(200, {}, image_bytes or tiny_jpeg())
                 challenge = 'Digest qop="auth", realm="rokudev", nonce="1"'
                 return device.HttpResponse(401, {"www-authenticate": challenge}, b"")
             if url.endswith("/plugin_package"):
@@ -230,7 +231,8 @@ def test_screenshot_command(project: Path, capsys: pytest.CaptureFixture[str]) -
         run("screenshot", "--host", "h", "--password", "pw", root=project, factory=fake_factory())
         == 0
     )
-    assert (project / "dist" / "screenshot.jpg").read_bytes() == b"\xff\xd8jpeg"
+    with Image.open(project / "dist" / "screenshot.jpg") as shot:
+        assert shot.size == (1920, 1080)
     assert "Saved" in capsys.readouterr().out
     custom = project / "shot.jpg"
     assert (

@@ -80,6 +80,19 @@ def test_weather_icons() -> None:
         images.weather_icon("hail")
 
 
+def test_ensure_fhd(tmp_path: Path) -> None:
+    jpg = tmp_path / "shot.jpg"
+    Image.new("RGB", (1280, 720), (1, 2, 3)).save(jpg, format="JPEG")
+    assert images.ensure_fhd(jpg) == (1920, 1080)
+    with Image.open(jpg) as reloaded:
+        assert reloaded.size == (1920, 1080)
+    png = tmp_path / "shot.png"
+    Image.new("RGBA", (1920, 1080), (1, 2, 3, 255)).save(png)
+    assert images.ensure_fhd(png) == (1920, 1080)
+    with Image.open(png) as reloaded:
+        assert reloaded.format == "PNG"
+
+
 def test_build_images(tmp_path: Path) -> None:
     written = images.build_images(tmp_path / "images")
     assert len(written) == 36 + 6 + 3 + 3 + len(images.WEATHER_KINDS)

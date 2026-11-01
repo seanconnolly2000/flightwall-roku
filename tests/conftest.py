@@ -143,6 +143,13 @@ def write_png(path: Path, size: tuple[int, int] = (4, 4)) -> None:
     Image.new("RGBA", size, (0, 0, 0, 255)).save(path)
 
 
+def tiny_jpeg() -> bytes:
+    """A real 8x4 JPEG, for fakes that stand in for the Roku's screenshot utility."""
+    buffer = io.BytesIO()
+    Image.new("RGB", (8, 4), (20, 30, 40)).save(buffer, format="JPEG")
+    return buffer.getvalue()
+
+
 def make_channel(root: Path) -> Path:
     """Create a minimal, internally consistent channel tree under root/roku."""
     roku = root / "roku"

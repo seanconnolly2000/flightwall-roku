@@ -92,9 +92,10 @@ In the Developer Dashboard choose **Manage My Channels > Add Channel > Developer
 
 1. **Properties**: name FlightWall; classification Screensaver; language English; countries United States.
 2. **Channel Store Info**: paste the text from `store/LISTING.md`, upload the channel posters
-   (`roku/images/icon_focus_*.png`), the screenshots in `store/screenshots/`, and the privacy
-   policy and terms of service URLs (`store/PRIVACY.md`, `store/TERMS.md` on GitHub), the
-   support URL (`store/SUPPORT.md`) and support email. Content rating: all audiences.
+   (`roku/images/icon_focus_*.png`), the 16:9 screenshots from `store/screenshots/` (all exactly
+   1920 x 1080; the dashboard rejects any other size, and files in `dist/` are not screenshots),
+   and the privacy policy and terms of service URLs (`store/PRIVACY.md`, `store/TERMS.md` on
+   GitHub), the support URL (`store/SUPPORT.md`) and support email. Content rating: all audiences.
 3. **Monetization**: none.
 4. **Package Upload**: upload `dist/flightwall-screensaver.pkg` (or `flightwall-channel.pkg`
    for a channel-type listing), set the version to match the manifest, and set the minimum
