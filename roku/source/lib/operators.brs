@@ -20,7 +20,21 @@ function Operators_TableLookup(table as String, icao as String) as String
 end function
 
 function Operators_OrgWords() as Object
-    return ["LLC", "INC", "CORP", "CO", "COMPANY", "LTD", "LP", "LLP", "PLC", "GMBH", "TRUST", "TRUSTEE", "BANK", "AIR", "AVIATION", "AIRLINES", "AIRWAYS", "AIRLINE", "LEASING", "HOLDINGS", "GROUP", "DEPARTMENT", "DEPT", "UNITED", "STATES", "US", "USA", "FEDERAL", "STATE", "COUNTY", "CITY", "UNIVERSITY", "COLLEGE", "POLICE", "SHERIFF", "FIRE", "FORCE", "NAVY", "ARMY", "COAST", "GUARD", "GOVERNMENT", "AGENCY", "ADMINISTRATION", "AUTHORITY", "PARTNERS", "ASSOCIATES", "ASSOCIATION", "CLUB", "SCHOOL", "FLIGHT", "FLYING", "JET", "JETS", "CHARTER", "SERVICES", "SERVICE", "ENTERPRISES", "INDUSTRIES", "SALES", "INTERNATIONAL", "NETWORK", "SYSTEMS", "MEDICAL", "HOSPITAL", "HEALTH", "EXPRESS", "CARGO", "FOUNDATION", "MINISTRY", "LIMITED", "INCORPORATED", "CORPORATION", "DBA", "HELICOPTER", "HELICOPTERS", "RESCUE", "PATROL", "TRANSPORT", "LOGISTICS", "AERO", "AIRCRAFT", "AVIATION", "FLYERS", "RENTAL", "RENTALS", "LEASE", "FINANCE", "CAPITAL", "MANAGEMENT", "TECHNOLOGIES", "TECHNOLOGY", "ENERGY", "OIL", "RANCH", "FARMS", "CHURCH", "MISSION", "AMBULANCE", "MEDFLIGHT", "LIFE", "WINGS"]
+    return [
+        "LLC", "INC", "CORP", "CO", "COMPANY", "LTD", "LP", "LLP"
+        "PLC", "GMBH", "TRUST", "TRUSTEE", "BANK", "AIR", "AVIATION", "AIRLINES"
+        "AIRWAYS", "AIRLINE", "LEASING", "HOLDINGS", "GROUP", "DEPARTMENT", "DEPT", "UNITED"
+        "STATES", "US", "USA", "FEDERAL", "STATE", "COUNTY", "CITY", "UNIVERSITY"
+        "COLLEGE", "POLICE", "SHERIFF", "FIRE", "FORCE", "NAVY", "ARMY", "COAST"
+        "GUARD", "GOVERNMENT", "AGENCY", "ADMINISTRATION", "AUTHORITY", "PARTNERS", "ASSOCIATES", "ASSOCIATION"
+        "CLUB", "SCHOOL", "FLIGHT", "FLYING", "JET", "JETS", "CHARTER", "SERVICES"
+        "SERVICE", "ENTERPRISES", "INDUSTRIES", "SALES", "INTERNATIONAL", "NETWORK", "SYSTEMS", "MEDICAL"
+        "HOSPITAL", "HEALTH", "EXPRESS", "CARGO", "FOUNDATION", "MINISTRY", "LIMITED", "INCORPORATED"
+        "CORPORATION", "DBA", "HELICOPTER", "HELICOPTERS", "RESCUE", "PATROL", "TRANSPORT", "LOGISTICS"
+        "AERO", "AIRCRAFT", "FLYERS", "RENTAL", "RENTALS", "LEASE", "FINANCE", "CAPITAL"
+        "MANAGEMENT", "TECHNOLOGIES", "TECHNOLOGY", "ENERGY", "OIL", "RANCH", "FARMS", "CHURCH"
+        "MISSION", "AMBULANCE", "MEDFLIGHT", "LIFE", "WINGS"
+    ]
 end function
 
 ' True when a registry owner string reads like an organization rather than a person.
@@ -34,7 +48,12 @@ function Operators_IsOrganization(name as String) as Boolean
 end function
 
 function Operators_KeepUpper() as Object
-    return { LLC: true, LP: true, LLP: true, PLC: true, USA: true, US: true, FAA: true, DHS: true, NASA: true, CBP: true, FBI: true, DEA: true, USAF: true, USCG: true, USN: true, USMC: true, NOAA: true, UPS: true, DHL: true, II: true, III: true, IV: true, JR: true, SR: true, DBA: true, GMBH: true, SA: true, AG: true, BV: true, NV: true }
+    return {
+        LLC: true, LP: true, LLP: true, PLC: true, USA: true, US: true, FAA: true, DHS: true
+        NASA: true, CBP: true, FBI: true, DEA: true, USAF: true, USCG: true, USN: true, USMC: true
+        NOAA: true, UPS: true, DHL: true, II: true, III: true, IV: true, JR: true, SR: true
+        DBA: true, GMBH: true, SA: true, AG: true, BV: true, NV: true
+    }
 end function
 
 ' "HORIZON AIR INDUSTRIES INC" -> "Horizon Air Industries Inc" (acronyms kept).
