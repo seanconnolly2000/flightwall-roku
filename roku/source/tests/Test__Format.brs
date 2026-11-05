@@ -58,3 +58,20 @@ sub Test_Format_SummaryAndType()
     ac.hex = "abc"
     UTF_assertEqual(Format_AircraftType(ac), "ICAO ABC")
 end sub
+
+' The hint label is 520 px wide with no wrapping, so a long hint is silently cut off with
+' an ellipsis on the TV. Measure both hints with the system font at the label size.
+' @Test
+sub Test_Format_HintsFitThePanel()
+    registry = CreateObject("roFontRegistry")
+    font = registry.GetDefaultFont(15, false, false)
+    UTF_assertNotInvalid(font)
+    for each screensaver in [true, false]
+        text = Format_Hint(screensaver)
+        width = font.GetOneLineWidth(text, 4000)
+        print "hint width "; width; " px: "; text
+        UTF_assertTrue(width <= 520, "hint wider than the panel (" + width.ToStr() + " px): " + text)
+    end for
+    UTF_assertTrue(Instr(1, Format_Hint(true), "*") = 0, "the screensaver hint must not mention remote keys")
+    UTF_assertTrue(Instr(1, Format_Hint(false), "*") > 0)
+end sub

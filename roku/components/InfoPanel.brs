@@ -145,11 +145,7 @@ sub refreshBanner()
 end sub
 
 sub refreshHint()
-    if m.top.screensaver then
-        setText(m.hintLabel, "FlightWall screensaver  -  any button exits  -  settings: Settings > Theme > Screensavers > FlightWall")
-    else
-        setText(m.hintLabel, "Press * for settings    Play: activity log    Up/Down: radius")
-    end if
+    setText(m.hintLabel, Format_Hint(m.top.screensaver = true))
 end sub
 
 sub refreshStatus()

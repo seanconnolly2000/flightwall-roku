@@ -49,7 +49,8 @@ Everything can be changed later: press `*` (Options) or **OK** on the main scree
 2. On the Roku go to **Settings > Theme > Screensavers** and select **FlightWall**.
 3. Still under Screensavers, set **Wait time** to how long the Roku should idle before it starts.
 4. Choose **Change screensaver settings** on the FlightWall entry to set the ZIP code, radius and
-   other options. The screensaver and the channel share the same settings.
+   other options. A screensaver installed from the Channel Store keeps its own settings, separate
+   from the FlightWall app, so set the ZIP code in each one you install.
 
 Any button press ends the screensaver, as with every Roku screensaver.
 

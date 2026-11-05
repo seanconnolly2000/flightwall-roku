@@ -202,7 +202,7 @@ sub start()
     applySettingsToViews()
     if not Settings_IsZipValid(Util_Str(m.settings.zip)) then
         if m.screensaver then
-            m.panel.banner = "Set your ZIP code first: Settings > Theme > Screensavers > FlightWall > Change screensaver settings (or open the FlightWall channel and press *)."
+            m.panel.banner = "Set your ZIP code first. On the Roku go to Settings > Theme > Screensavers, select FlightWall, then choose Change screensaver settings."
         else
             openSettings("Welcome to FlightWall. Enter your ZIP code and pick a radius to begin.", "zip")
         end if

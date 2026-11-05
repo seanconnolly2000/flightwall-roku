@@ -122,7 +122,9 @@ Remote keys on the main screen:
 ### Use it as the screensaver
 
 Roku requires a screensaver package to have no `Main()` entry point, so a screensaver-only
-build is produced alongside the channel. The two share the same code and the same settings.
+build is produced alongside the channel. The two share the same code. Side-loaded builds also
+share settings (one developer registry); Channel Store installs of the app and the screensaver
+keep separate settings.
 
 1. Side-load the combined build first (`flightwall deploy`) and set your ZIP and radius.
 2. Side-load the screensaver build: `uv run flightwall deploy --host <ip> --screensaver-only`

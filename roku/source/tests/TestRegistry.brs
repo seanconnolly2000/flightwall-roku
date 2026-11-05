@@ -47,6 +47,7 @@ sub FlightWall_RunTests(args as Object)
         Test_Format_Measurements
         Test_Format_Clock
         Test_Format_SummaryAndType
+        Test_Format_HintsFitThePanel
         Test_Zips_LookupSampleTable
         Test_Zips_LookupBundledTable
         Test_Zips_NearestCity
