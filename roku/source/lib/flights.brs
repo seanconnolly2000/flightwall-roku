@@ -2,7 +2,7 @@
 '
 ' Normalised aircraft record:
 '   hex, callsign, registration, typeCode, lat, lon, altFt, ground, speedKts,
-'   track (degrees, -1 unknown), vrate (ft/min), squawk, category, distMi, bearing
+'   track (degrees, -1 unknown), vrate (ft/min), squawk, category, helicopter, distMi, bearing
 
 function Flights_Blank() as Object
     return {
@@ -19,6 +19,7 @@ function Flights_Blank() as Object
         vrate: 0
         squawk: ""
         category: ""
+        helicopter: false
         distMi: 0.0
         bearing: 0.0
         ownOp: ""
@@ -37,7 +38,7 @@ end function
 function Flights_ProviderUrl(provider as String, lat as Float, lon as Float, radiusMiles as Float) as String
     if provider = "opensky" then
         bounds = Geo_BBox(lat, lon, radiusMiles)
-        return "https://opensky-network.org/api/states/all?lamin=" + Util_FloatStr(bounds.lamin, 4) + "&lomin=" + Util_FloatStr(bounds.lomin, 4) + "&lamax=" + Util_FloatStr(bounds.lamax, 4) + "&lomax=" + Util_FloatStr(bounds.lomax, 4)
+        return "https://opensky-network.org/api/states/all?lamin=" + Util_FloatStr(bounds.lamin, 4) + "&lomin=" + Util_FloatStr(bounds.lomin, 4) + "&lamax=" + Util_FloatStr(bounds.lamax, 4) + "&lomax=" + Util_FloatStr(bounds.lomax, 4) + "&extended=1"
     end if
     nm = Geo_NmFromMiles(radiusMiles)
     if nm > Flights_MaxNm() then nm = Flights_MaxNm()
@@ -116,6 +117,7 @@ function Flights_FromAdsb(raw as Object) as Object
     ac.category = Util_Str(raw.category)
     ac.ownOp = Util_Str(raw.ownOp)
     ac.desc = Util_Str(raw.desc)
+    ac.helicopter = Flights_IsHelicopter(ac)
     return ac
 end function
 
@@ -135,7 +137,45 @@ function Flights_FromOpenSky(state as Object) as Object
     if Util_IsNumber(state[10]) then ac.track = state[10]
     if Util_IsNumber(state[11]) then ac.vrate = Int(state[11] * 196.85)
     if state.Count() > 14 then ac.squawk = Util_Str(state[14])
+    ' With extended=1 the last element is the emitter category as an integer; 8 is rotorcraft.
+    if state.Count() > 17 and Util_IsNumber(state[17]) then
+        if Int(state[17]) = 8 then ac.category = "A7"
+    end if
+    ac.helicopter = Flights_IsHelicopter(ac)
     return ac
+end function
+
+' ICAO type designators of common rotorcraft, for transponders that send no emitter category.
+function Flights_RotorTypes() as Object
+    return {
+        A109: true, A119: true, A139: true, A149: true, A169: true, A189: true, A609: true, AS32: true
+        AS50: true, AS55: true, AS65: true, B06: true, B06T: true, B105: true, B212: true, B214: true
+        B222: true, B230: true, B407: true, B412: true, B427: true, B429: true, B430: true, B47G: true
+        B505: true, B525: true, BK17: true, EC20: true, EC25: true, EC30: true, EC35: true, EC45: true
+        EC55: true, EC75: true, EH10: true, EN28: true, EN48: true, EXPL: true, GAZL: true, H160: true
+        H269: true, H47: true, H500: true, H53: true, H60: true, H64: true, K126: true, KA32: true
+        LYNX: true, MD52: true, MD60: true, MI8: true, MI17: true, NH90: true, PUMA: true, R22: true
+        R44: true, R66: true, S330: true, S61: true, S64: true, S76: true, S92: true, UH1: true
+        UH1Y: true, V22: true
+    }
+end function
+
+' Words that only rotorcraft descriptions carry. Manufacturer names that are also common
+' surnames (amateur-built aircraft list the builder) or that made gliders are left out.
+function Flights_RotorWords() as Object
+    return ["HELICOPTER", "ROTORCRAFT", "EUROCOPTER", "SIKORSKY", "AGUSTA", "KAMAN", "ENSTROM", "ROTORWAY", "CHINOOK"]
+end function
+
+' Rotorcraft: the ADS-B emitter category A7 is authoritative; the type designator and the
+' registry description catch older transponders that send no category.
+function Flights_IsHelicopter(ac as Object) as Boolean
+    if UCase(Util_Str(ac.category)) = "A7" then return true
+    if Flights_RotorTypes().DoesExist(UCase(Util_Str(ac.typeCode))) then return true
+    text = UCase(Util_Str(ac.desc) + " " + Util_Str(ac.modelName))
+    for each word in Flights_RotorWords()
+        if Instr(1, text, word) > 0 then return true
+    end for
+    return false
 end function
 
 ' Maps an HTTP status to what the UI should do about it.
@@ -173,12 +213,21 @@ function Flights_AltitudeColor(altFt as Integer, ground as Boolean) as String
     return "0x7CC4FFFF"
 end function
 
-' Sprite base name for a track, e.g. 94 degrees -> "plane_090".
-function Flights_SpriteName(track as Float) as String
+' Sprite base name for a track, e.g. 94 degrees -> "plane_090" (or "heli_090" for rotorcraft).
+function Flights_SpriteName(track as Float, helicopter = false as Boolean) as String
     if track < 0 then track = 0
     heading = Int((track / 10.0) + 0.5) * 10
     heading = heading MOD 360
-    return "plane_" + Util_PadLeft(heading.ToStr(), 3, "0")
+    prefix = "plane_"
+    if helicopter then prefix = "heli_"
+    return prefix + Util_PadLeft(heading.ToStr(), 3, "0")
+end function
+
+' Icon tint: grey on the ground, orange for rotorcraft, otherwise the altitude band.
+function Flights_IconColor(ac as Object) as String
+    if ac.ground = true then return Flights_AltitudeColor(0, true)
+    if ac.helicopter = true then return "0xFF8A2BFF"
+    return Flights_AltitudeColor(Util_ToInt(ac.altFt), false)
 end function
 
 function Flights_DisplayName(ac as Object) as String

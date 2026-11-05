@@ -19,6 +19,7 @@ sub Test_Flights_ProviderUrls()
     openSky = Flights_ProviderUrl("opensky", 37.7749, -122.4194, 50)
     UTF_assertTrue(openSky.Instr("https://opensky-network.org/api/states/all?lamin=") = 0, openSky)
     UTF_assertTrue(openSky.Instr("&lomax=") > 0)
+    UTF_assertTrue(openSky.Instr("&extended=1") > 0)
 end sub
 
 ' @Test
@@ -56,9 +57,9 @@ end sub
 
 ' @Test
 sub Test_Flights_ParseOpenSky()
-    body = Flights_TestJson("{'time':1,'states':[['a1bfac','UAL930  ','United States',1,1,-122.39,37.617,3048.0,false,250.0,90.0,5.0,null,3100.0,'3365',false,0,3],['short'],['x','y','z',1,1,null,null]]}")
+    body = Flights_TestJson("{'time':1,'states':[['a1bfac','UAL930  ','United States',1,1,-122.39,37.617,3048.0,false,250.0,90.0,5.0,null,3100.0,'3365',false,0,3],['short'],['x','y','z',1,1,null,null],['heli1','MEDIC1 ','US',1,1,-122.0,37.3,300.0,false,60.0,180.0,0.0,null,320.0,'1200',false,0,8]]}")
     aircraft = Flights_Parse("opensky", body, 37.7749, -122.4194, 50)
-    UTF_assertEqual(aircraft.Count(), 1)
+    UTF_assertEqual(aircraft.Count(), 2)
     ac = aircraft[0]
     UTF_assertEqual(ac.hex, "a1bfac")
     UTF_assertEqual(ac.callsign, "UAL930")
@@ -68,6 +69,51 @@ sub Test_Flights_ParseOpenSky()
     UTF_assertEqual(ac.vrate, 984)
     UTF_assertEqual(ac.squawk, "3365")
     UTF_assertFalse(ac.ground)
+    UTF_assertFalse(ac.helicopter)
+    heli = aircraft[1]
+    UTF_assertEqual(heli.callsign, "MEDIC1")
+    UTF_assertEqual(heli.category, "A7")
+    UTF_assertTrue(heli.helicopter)
+end sub
+
+' @Test
+sub Test_Flights_Helicopters()
+    blank = Flights_Blank()
+    UTF_assertFalse(Flights_IsHelicopter(blank))
+    byCategory = Flights_Blank()
+    byCategory.category = "A7"
+    UTF_assertTrue(Flights_IsHelicopter(byCategory))
+    byType = Flights_Blank()
+    byType.typeCode = "ec35"
+    UTF_assertTrue(Flights_IsHelicopter(byType))
+    byDesc = Flights_Blank()
+    byDesc.desc = "Eurocopter MH-65D Dolphin"
+    UTF_assertTrue(Flights_IsHelicopter(byDesc))
+    byModel = Flights_Blank()
+    byModel.modelName = "Airbus Helicopters EC-135 - N123AB"
+    UTF_assertTrue(Flights_IsHelicopter(byModel))
+    glider = Flights_Blank()
+    glider.typeCode = "SGS"
+    glider.desc = "SCHWEIZER SGS 2-33A"
+    UTF_assertFalse(Flights_IsHelicopter(glider))
+    plane = Flights_Blank()
+    plane.typeCode = "C172"
+    plane.desc = "CESSNA 172 Skyhawk"
+    plane.category = "A1"
+    UTF_assertFalse(Flights_IsHelicopter(plane))
+    raw = ParseJson(Flights_TestJson("{'hex':'c6525','flight':'C6525','t':'AS65','category':'A7','desc':'Eurocopter MH-65D Dolphin','alt_baro':800,'lat':37.8,'lon':-122.4,'track':270}"))
+    parsed = Flights_FromAdsb(raw)
+    UTF_assertTrue(parsed.helicopter)
+    UTF_assertEqual(Flights_SpriteName(94, true), "heli_090")
+    UTF_assertEqual(Flights_SpriteName(94, false), "plane_090")
+    UTF_assertEqual(Flights_SpriteName(355, true), "heli_000")
+    UTF_assertEqual(Flights_IconColor(parsed), "0xFF8A2BFF")
+    parsed.ground = true
+    UTF_assertEqual(Flights_IconColor(parsed), "0x8B949EFF")
+    plane.altFt = 35000
+    UTF_assertEqual(Flights_IconColor(plane), "0x7CC4FFFF")
+    plane.altFt = 5000
+    UTF_assertEqual(Flights_IconColor(plane), "0xFFC857FF")
 end sub
 
 ' @Test

@@ -386,6 +386,8 @@ end sub
 
 ' Fills operatorName/operatorKind/modelName on each aircraft from the route, the bundled
 ' and looked-up airline names, the registry owner, and the viewer's owner-name setting.
+' The registry type and model also settle whether an aircraft is a helicopter when the
+' feed itself did not say.
 sub decorateAircraft(aircraft as Object, displayRoutes as Object)
     showNames = Settings_Flag(m.settings, "ownerNames")
     for each ac in aircraft
@@ -397,7 +399,9 @@ sub decorateAircraft(aircraft as Object, displayRoutes as Object)
         resolved = Operators_Resolve(ac, route, airline, owner, showNames)
         ac.operatorName = resolved.name
         ac.operatorKind = resolved.kind
+        if Util_Str(ac.typeCode) = "" and owner <> invalid then ac.typeCode = Util_Str(owner.typeCode)
         ac.modelName = Operators_Model(ac, owner)
+        if ac.helicopter <> true then ac.helicopter = Flights_IsHelicopter(ac)
     end for
 end sub
 

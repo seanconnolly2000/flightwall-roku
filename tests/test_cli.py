@@ -120,6 +120,7 @@ def test_build_data_and_images(project: Path, capsys: pytest.CaptureFixture[str]
     assert "ZIP codes" in out
     assert run("images", root=project) == 0
     assert (project / "roku" / "images" / "planes" / "plane_090.png").exists()
+    assert (project / "roku" / "images" / "planes" / "heli_090.png").exists()
 
 
 def test_build_data_rejects_unknown_region(

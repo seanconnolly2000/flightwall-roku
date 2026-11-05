@@ -40,6 +40,26 @@ def test_plane_sprite_points_north_then_rotates() -> None:
     assert px(east, (16, 3))[3] == 0
 
 
+def opaque(image: Image.Image) -> int:
+    """Number of pixels that are more than half opaque."""
+    return sum(image.getchannel("A").histogram()[129:])
+
+
+def test_heli_sprite_is_smaller_and_rotates() -> None:
+    assert images.heli_filename(90) == "heli_090.png"
+    north = images.heli_sprite(0)
+    plane = images.plane_sprite(0)
+    assert north.size == (32, 32)
+    assert px(north, (16, 16))[3] > 0
+    assert px(north, (0, 0))[3] == 0
+    assert px(plane, (16, 3))[3] > 0
+    assert px(north, (16, 3))[3] == 0
+    assert px(north, (7, 16))[3] == 0
+    assert opaque(north) < opaque(plane) * 0.75
+    east = images.heli_sprite(90)
+    assert px(east, (7, 16))[3] > 0
+
+
 def test_dots_and_mask() -> None:
     solid = images.dot(8)
     assert px(solid, (4, 4))[3] == 255
@@ -95,7 +115,7 @@ def test_ensure_fhd(tmp_path: Path) -> None:
 
 def test_build_images(tmp_path: Path) -> None:
     written = images.build_images(tmp_path / "images")
-    assert len(written) == 36 + 6 + len(images.ICON_SIZES) + len(images.SPLASH_SIZES) + len(
+    assert len(written) == 36 + 36 + 6 + len(images.ICON_SIZES) + len(images.SPLASH_SIZES) + len(
         images.WEATHER_KINDS
     )
     for name in written:

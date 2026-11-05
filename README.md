@@ -15,6 +15,8 @@ and [TheFlightWall](https://github.com/AxisNimble/TheFlightWall_OSS).
   build time, so the Roku only places a few images instead of drawing geometry.
 - **Live aircraft** with altitude-tinted plane icons, callsign, airline logo, origin and
   destination, a breadcrumb trail, and a line pointing back toward where the flight came from.
+  Helicopters get a smaller orange rotorcraft icon, identified from the ADS-B emitter
+  category, the ICAO type designator or the registry description.
 - **ZIP code + radius** entered on the TV with the remote (10 to 250 miles).
 - **Polling every 10 s by default** (10/15/20/30/60 s), with exponential back-off when a
   data source pushes back.

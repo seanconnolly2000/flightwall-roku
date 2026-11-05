@@ -1,5 +1,6 @@
-' The round map: pre-rendered land/water tiles, airports, city labels, aircraft,
-' breadcrumb trails and a line pointing back toward where each flight came from.
+' The round map: pre-rendered land/water tiles, airports, city labels, aircraft (planes
+' tinted by altitude, helicopters as a smaller orange rotorcraft icon), breadcrumb trails
+' and a line pointing back toward where each flight came from.
 
 sub init()
     m.root = m.top.findNode("root")
@@ -248,9 +249,10 @@ end sub
 
 sub updatePlane(plane as Object, ac as Object, pt as Object, route as Object)
     plane.group.translation = [pt.x, pt.y]
-    setUri(plane.icon, "pkg:/images/planes/" + Flights_SpriteName(Util_ToFloat(ac.track, -1)) + ".png")
+    sprite = Flights_SpriteName(Util_ToFloat(ac.track, -1), ac.helicopter = true)
+    setUri(plane.icon, "pkg:/images/planes/" + sprite + ".png")
     ' Color fields read back as integers, so remember the last string we set instead of comparing.
-    color = Flights_AltitudeColor(Util_ToInt(ac.altFt), ac.ground = true)
+    color = Flights_IconColor(ac)
     if plane.color <> color then
         plane.icon.blendColor = color
         plane.color = color

@@ -1,4 +1,4 @@
-"""Generate the channel's static artwork: plane sprites, markers, mask, icons, splash."""
+"""Generate the channel's static artwork: plane/helicopter sprites, markers, mask, icons, splash."""
 
 from __future__ import annotations
 
@@ -42,6 +42,28 @@ PLANE_OUTLINE = [
     (14, 5),
 ]
 
+# Top-down helicopter pointing north in the same 32x32 box, drawn at HELI_SCALE so it
+# reads as the lighter traffic it is: cabin, tail boom, tail plane, rotor hub and two
+# rotor blades crossing the cabin as an X.
+HELI_SCALE = 0.72
+HELI_CABIN = [
+    (16, 7),
+    (20, 10),
+    (21, 14),
+    (20, 18),
+    (18, 21),
+    (14, 21),
+    (12, 18),
+    (11, 14),
+    (12, 10),
+]
+HELI_BOOM = (15, 20, 17, 29)
+HELI_TAIL = (12, 27, 20, 29)
+HELI_HUB = (16, 14)
+HELI_ROTOR_RADIUS = 13
+HELI_BLADE_WIDTH = 2.8
+HELI_HUB_RADIUS = 2.2
+
 ICON_SIZES = {
     "icon_focus_fhd.png": (540, 405),
     "icon_focus_hd.png": (290, 218),
@@ -61,6 +83,10 @@ def sprite_filename(heading: int) -> str:
     return f"plane_{heading:03d}.png"
 
 
+def heli_filename(heading: int) -> str:
+    return f"heli_{heading:03d}.png"
+
+
 def nearest_sprite_heading(track: float, step: int = SPRITE_STEP_DEG) -> int:
     """Round a track (degrees clockwise from north) to the nearest sprite heading."""
     return int(round(track / step) * step) % 360
@@ -74,6 +100,37 @@ def plane_sprite(
     canvas = Image.new("RGBA", (big, big), TRANSPARENT)
     draw = ImageDraw.Draw(canvas)
     draw.polygon([(x * scale, y * scale) for x, y in PLANE_OUTLINE], fill=color)
+    rotated = canvas.rotate(-heading, resample=Image.Resampling.BICUBIC)
+    return rotated.resize((size, size), Image.Resampling.LANCZOS)
+
+
+def _heli_point(x: float, y: float, scale: float) -> tuple[float, float]:
+    """Shrink a 32-box coordinate toward the centre, then scale it to the supersampled canvas."""
+    half = SPRITE_SIZE / 2
+    return ((half + (x - half) * HELI_SCALE) * scale, (half + (y - half) * HELI_SCALE) * scale)
+
+
+def heli_sprite(
+    heading: int = 0, size: int = SPRITE_SIZE, color: tuple[int, ...] = WHITE
+) -> Image.Image:
+    big = size * SUPERSAMPLE
+    scale = big / SPRITE_SIZE
+    canvas = Image.new("RGBA", (big, big), TRANSPARENT)
+    draw = ImageDraw.Draw(canvas)
+    draw.polygon([_heli_point(x, y, scale) for x, y in HELI_CABIN], fill=color)
+    for box in (HELI_BOOM, HELI_TAIL):
+        x0, y0 = _heli_point(box[0], box[1], scale)
+        x1, y1 = _heli_point(box[2], box[3], scale)
+        draw.rectangle((x0, y0, x1, y1), fill=color)
+    hx, hy = _heli_point(HELI_HUB[0], HELI_HUB[1], scale)
+    reach = HELI_ROTOR_RADIUS * HELI_SCALE * scale
+    width = max(1, round(HELI_BLADE_WIDTH * HELI_SCALE * scale))
+    for angle in (45, 135):
+        dx = math.cos(math.radians(angle)) * reach
+        dy = math.sin(math.radians(angle)) * reach
+        draw.line((hx - dx, hy - dy, hx + dx, hy + dy), fill=color, width=width)
+    hub = HELI_HUB_RADIUS * HELI_SCALE * scale
+    draw.ellipse((hx - hub, hy - hub, hx + hub, hy + hub), fill=color)
     rotated = canvas.rotate(-heading, resample=Image.Resampling.BICUBIC)
     return rotated.resize((size, size), Image.Resampling.LANCZOS)
 
@@ -236,6 +293,10 @@ def build_images(images_dir: Path) -> list[str]:
     for heading in sprite_headings():
         name = sprite_filename(heading)
         plane_sprite(heading).save(planes / name)
+        written.append(f"planes/{name}")
+    for heading in sprite_headings():
+        name = heli_filename(heading)
+        heli_sprite(heading).save(planes / name)
         written.append(f"planes/{name}")
     singles = {
         "dot.png": dot(8),

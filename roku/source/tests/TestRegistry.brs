@@ -33,6 +33,7 @@ sub FlightWall_RunTests(args as Object)
         Test_Flights_BackoffAndPrompt
         Test_Flights_Presentation
         Test_Flights_Airborne
+        Test_Flights_Helicopters
         Test_Routes_Callsigns
         Test_Routes_ParseFound
         Test_Routes_ParseUnknownAndGarbage
