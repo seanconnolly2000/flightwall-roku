@@ -40,6 +40,13 @@ def test_strip_key_handler_scripts() -> None:
     )
 
 
+def test_manifest_version() -> None:
+    text = "title=X\nmajor_version=1\nminor_version = 0\nbuild_version=4\n"
+    assert package.manifest_version(text) == "1.0.4"
+    assert package.manifest_version("title=X\nno equals sign here\n") == "0.0.0"
+    assert package.manifest_version("") == "0.0.0"
+
+
 def test_screensaver_manifest_drops_title_and_splash() -> None:
     text = (
         "title=X\nsubtitle=Y\nscreensaver_title=X\nmm_icon_focus_hd=pkg:/i.png\n"

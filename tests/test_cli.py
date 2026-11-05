@@ -10,7 +10,7 @@ import pytest
 from PIL import Image
 
 from conftest import fake_sources, make_channel, tiny_jpeg
-from flightwall_tools import cli, device
+from flightwall_tools import cli, device, package
 from flightwall_tools.device import RokuDevice
 
 TEST_OUTPUT = (
@@ -294,8 +294,27 @@ def test_genkey_and_sign_commands(project: Path, capsys: pytest.CaptureFixture[s
         )
         == 0
     )
-    assert (project / "dist" / "flightwall-screensaver.pkg").read_bytes() == b"PKG" * 500
+    version = package.manifest_version((project / "roku" / "manifest").read_text())
+    saved = project / "dist" / f"flightwall-screensaver-{version}.pkg"
+    assert saved.read_bytes() == b"PKG" * 500
     assert "Saved signed package" in capsys.readouterr().out
+    assert (
+        run(
+            "sign",
+            "--host",
+            "h",
+            "--password",
+            "pw",
+            "--signing-password",
+            "s3cret",
+            "--variant",
+            "channel",
+            root=project,
+            factory=fake_factory(),
+        )
+        == 0
+    )
+    assert (project / "dist" / f"flightwall-channel-{version}.pkg").exists()
     custom = project / "custom.pkg"
     assert (
         run(
@@ -308,6 +327,8 @@ def test_genkey_and_sign_commands(project: Path, capsys: pytest.CaptureFixture[s
             "s3cret",
             "--out",
             str(custom),
+            "--app-name",
+            "FlightWall/9.9",
             root=project,
             factory=fake_factory(),
         )
@@ -367,7 +388,7 @@ def test_host_and_secrets_from_dotenv(
     )
     assert run("screenshot", root=project, factory=fake_factory()) == 0
     assert run("sign", root=project, factory=fake_factory()) == 0
-    assert (project / "dist" / "flightwall-screensaver.pkg").exists()
+    assert list((project / "dist").glob("flightwall-screensaver-*.pkg"))
     for key in (cli.HOST_ENV, cli.PASSWORD_ENV, cli.SIGNING_PASSWORD_ENV):
         monkeypatch.delenv(key)
 

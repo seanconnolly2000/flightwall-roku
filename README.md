@@ -255,9 +255,9 @@ device signing key and produce the signed package:
 ```bash
 uv run flightwall genkey                                  # once; save the password in .env
 uv run flightwall deploy --screensaver-only               # screensaver build: no Main()
-uv run flightwall sign                                    # -> dist/flightwall-screensaver.pkg
+uv run flightwall sign                                    # -> dist/flightwall-screensaver-<version>.pkg
 uv run flightwall deploy --channel-only                   # channel build: no screensaver code
-uv run flightwall sign --out dist/flightwall-channel.pkg  # -> dist/flightwall-channel.pkg
+uv run flightwall sign --variant channel                  # -> dist/flightwall-channel-<version>.pkg
 ```
 
 Roku treats channels and screensavers as separate app types, each its own Channel Store listing
@@ -265,7 +265,8 @@ with its own package, and its static analysis rejects a package that mixes them.
 read from the manifest: a screensaver has `screensaver_title` and no `title`. Submit each type
 from its own build; the default (combined) build is for local side-loading only.
 
-The signed `.pkg` lands in `dist/`. Upload that file, not the `.zip` (the dashboard rejects
+The signed `.pkg` lands in `dist/`, named with the manifest version (for example
+`flightwall-channel-1.0.4.pkg`). Upload that file, not the `.zip` (the dashboard rejects
 zips as "incorrectly packaged"); the zips are for side-loading only. Filling in the listing and
 passing Roku's certification review happen in the Roku Developer Dashboard under your own account.
 

@@ -18,7 +18,7 @@ from .brscheck import check_channel
 from .cities import DEFAULT_MIN_POPULATION, build_cities
 from .device import DeviceError, RokuDevice, run_device_tests
 from .images import build_images, ensure_fhd
-from .package import build_package
+from .package import build_package, manifest_version
 from .sources import SOURCES, ensure
 from .tiles import DEFAULT_REGIONS, PX_PER_DEG, REGIONS, build_tiles
 from .zips import build_zips
@@ -259,9 +259,13 @@ def cmd_sign(args: argparse.Namespace, paths: Paths, factory: DeviceFactory) -> 
         print(f"No signing password: pass --signing-password or set {SIGNING_PASSWORD_ENV} in .env")
         return EXIT_USAGE
     device = factory(args.host, resolve_password(args.password))
-    out_path = Path(args.out) if args.out else paths.dist / "flightwall-screensaver.pkg"
+    version = manifest_version((paths.roku / "manifest").read_text(encoding="utf-8"))
+    app_name = args.app_name or f"FlightWall/{version}"
+    out_path = (
+        Path(args.out) if args.out else paths.dist / f"flightwall-{args.variant}-{version}.pkg"
+    )
     try:
-        saved = device.sign(args.app_name, signing_password, out_path)
+        saved = device.sign(app_name, signing_password, out_path)
     except DeviceError as exc:
         print(f"Signing failed: {exc}")
         return 1
@@ -371,9 +375,15 @@ def build_parser() -> argparse.ArgumentParser:
         help=f"password printed by genkey (or set {SIGNING_PASSWORD_ENV} in .env)",
     )
     p.add_argument(
-        "--app-name", default="FlightWall/1.0", help="name/version embedded in the package"
+        "--variant",
+        choices=("screensaver", "channel"),
+        default="screensaver",
+        help="which build is installed on the Roku; names the output file",
     )
-    p.add_argument("--out", help="output path (default dist/flightwall-screensaver.pkg)")
+    p.add_argument(
+        "--app-name", help="name/version embedded in the package (default FlightWall/<version>)"
+    )
+    p.add_argument("--out", help="output path (default dist/flightwall-<variant>-<version>.pkg)")
 
     p = sub.add_parser("delete", help="remove the side-loaded channel from the Roku")
     _add_device_args(p)

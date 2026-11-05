@@ -30,11 +30,12 @@ install it, and sign it:
 
 ```bash
 uv run flightwall deploy --screensaver-only
-uv run flightwall sign --app-name FlightWall/1.0
+uv run flightwall sign
 uv run flightwall deploy                          # optional: put the interactive build back
 ```
 
-`sign` saves `dist/flightwall-screensaver.pkg`. Bump `major_version` / `minor_version` /
+`sign` saves `dist/flightwall-screensaver-<version>.pkg`; the version in the file name and
+the app name embedded in the package both come from the manifest. Bump `major_version` / `minor_version` /
 `build_version` in `roku/manifest` for every submission.
 
 > **Upload the `.pkg`, never the `.zip`.** The zips in `dist/` are for side-loading only. The
@@ -53,7 +54,7 @@ clean package for each, so to publish both you create **two listings**:
 
 | Listing | Build | Produce the `.pkg` |
 |---|---|---|
-| FlightWall (channel) | `--channel-only`: no screensaver code or manifest lines | `flightwall deploy --channel-only` then `flightwall sign --out dist/flightwall-channel.pkg` |
+| FlightWall (channel) | `--channel-only`: no screensaver code or manifest lines | `flightwall deploy --channel-only` then `flightwall sign --variant channel` |
 | FlightWall screensaver | `--screensaver-only`: no `Main()`, no `title` | `flightwall deploy --screensaver-only` then `flightwall sign` |
 
 The default combined build (both `title` and `screensaver_title`) is only for local
@@ -81,9 +82,9 @@ A Beta channel lets up to 20 people install the channel from a link without side
 certification review. It expires after 120 days and cannot be renewed (create a new one). Use
 **Manage My Channels > Add Channel > Beta** and upload a `.pkg`:
 
-- `dist/flightwall-channel.pkg`: the interactive channel (map, settings screen, Play for the log),
+- `dist/flightwall-channel-<version>.pkg`: the interactive channel (map, settings screen, Play for the log),
   for a Beta channel of type "channel".
-- `dist/flightwall-screensaver.pkg`: the screensaver-only build, for a Beta channel of type
+- `dist/flightwall-screensaver-<version>.pkg`: the screensaver-only build, for a Beta channel of type
   "screensaver".
 
 ## From beta to public
@@ -125,7 +126,7 @@ In the Developer Dashboard choose **Manage My Channels > Add Channel > Developer
    and the privacy policy and terms of service URLs (`store/PRIVACY.md`, `store/TERMS.md` on
    GitHub), the support URL (`store/SUPPORT.md`) and support email. Content rating: all audiences.
 3. **Monetization**: none.
-4. **Package Upload**: upload `dist/flightwall-screensaver.pkg` (or `flightwall-channel.pkg`
+4. **Package Upload**: upload `dist/flightwall-screensaver-<version>.pkg` (or `flightwall-channel-<version>.pkg`
    for a channel-type listing), set the version to match the manifest, and set the minimum
    firmware to Roku OS 15.1, which `rsg_version=1.3` requires.
 5. **Static Analysis**: run it and fix anything it flags.

@@ -55,6 +55,19 @@ def strip_screensaver_manifest(text: str) -> str:
     return "\n".join(kept).rstrip("\n") + "\n"
 
 
+VERSION_KEYS = ("major_version", "minor_version", "build_version")
+
+
+def manifest_version(text: str) -> str:
+    """major.minor.build from manifest text, e.g. "1.0.4"; a missing part reads as 0."""
+    values: dict[str, str] = {}
+    for line in text.splitlines():
+        key, sep, value = line.partition("=")
+        if sep:
+            values[key.strip()] = value.strip()
+    return ".".join(values.get(key, "0") for key in VERSION_KEYS)
+
+
 SCREENSAVER_DROPPED_PREFIXES = ("title=", "splash_")
 
 
