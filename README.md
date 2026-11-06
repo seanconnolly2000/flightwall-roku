@@ -14,7 +14,8 @@ and [TheFlightWall](https://github.com/AxisNimble/TheFlightWall_OSS).
   airports and city labels for orientation. The map is pre-rendered into small tiles at
   build time, so the Roku only places a few images instead of drawing geometry.
 - **Live aircraft** with altitude-tinted plane icons, callsign, airline logo, origin and
-  destination, a breadcrumb trail, and a line pointing back toward where the flight came from.
+  destination, a breadcrumb trail, and a short line toward where the flight came from (the
+  great-circle bearing to its origin airport, shown only while it agrees with the aircraft's track).
   Helicopters get a smaller orange rotorcraft icon, identified from the ADS-B emitter
   category, the ICAO type designator or the registry description.
 - **ZIP code + radius** entered on the TV with the remote (10 to 250 miles).

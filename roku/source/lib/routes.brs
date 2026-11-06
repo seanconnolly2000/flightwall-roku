@@ -182,3 +182,25 @@ function Routes_Pick(aircraft as Object, cache as Object, maxCount as Integer) a
     end for
     return picks
 end function
+
+' Direction cue toward where a flight came from. Uses the great-circle bearing from the
+' aircraft to its origin airport: on the flat map a line toward Munich points due east and
+' one toward Hong Kong points the wrong way round the globe. The line is capped at maxLenPx
+' and shown only when that bearing is within maxDiffDeg of the direction the aircraft is
+' moving away from, which hides stale routes on reused callsigns and holding patterns.
+' Returns {show, dx, dy, lengthPx}; (dx, dy) is a unit vector in screen space (y down).
+function Routes_OriginCue(ac as Object, route as Object, pxPerMile as Float, maxLenPx as Float, maxDiffDeg as Float) as Object
+    none = { show: false, dx: 0.0, dy: 0.0, lengthPx: 0.0 }
+    if ac.ground = true then return none
+    if not Routes_HasOrigin(route) then return none
+    track = Util_ToFloat(ac.track, -1)
+    if track < 0 then return none
+    lat = Util_ToFloat(ac.lat)
+    lon = Util_ToFloat(ac.lon)
+    bearing = Geo_Bearing(lat, lon, route.originLat, route.originLon)
+    if Abs(Geo_AngleDiff(bearing, track + 180)) > maxDiffDeg then return none
+    length = Util_Min(Geo_Haversine(lat, lon, route.originLat, route.originLon) * pxPerMile, maxLenPx)
+    if length < 4 then return none
+    rad = Geo_Rad(bearing)
+    return { show: true, dx: Sin(rad), dy: -Cos(rad), lengthPx: length }
+end function

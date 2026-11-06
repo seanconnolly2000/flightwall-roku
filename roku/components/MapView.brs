@@ -314,8 +314,9 @@ sub updateTrail(hex as String, pt as Object)
     trail.last = { x: pt.x, y: pt.y }
 end sub
 
-' A faint line from the aircraft back toward its origin airport (or, when the
-' route is unknown, back along its track) so you can see where it came from.
+' A faint line showing where the flight came from: along the great-circle bearing to its
+' origin airport, capped in length and only while it agrees with the aircraft's track
+' (Routes_OriginCue). Otherwise, with trails on, a short stub back along the track.
 sub updateLine(hex as String, ac as Object, pt as Object, route as Object)
     line = m.lines[hex]
     if line = invalid then
@@ -330,15 +331,13 @@ sub updateLine(hex as String, ac as Object, pt as Object, route as Object)
     dx = 0.0
     dy = 0.0
     length = 0.0
-    if ac.ground = true then
-        length = 0.0
-    else if Routes_HasOrigin(route) then
-        originPt = Geo_Project(m.proj, route.originLat, route.originLon)
-        dx = originPt.x - pt.x
-        dy = originPt.y - pt.y
-        length = Sqr(dx * dx + dy * dy)
+    cue = Routes_OriginCue(ac, route, m.proj.pxPerMile, 120.0, 60.0)
+    if cue.show then
+        dx = cue.dx
+        dy = cue.dy
+        length = cue.lengthPx
         line.opacity = 0.5
-    else if m.options.trails and Util_ToFloat(ac.track, -1) >= 0 then
+    else if ac.ground <> true and m.options.trails and Util_ToFloat(ac.track, -1) >= 0 then
         rad = Geo_Rad(Util_ToFloat(ac.track, 0))
         dx = -Sin(rad)
         dy = Cos(rad)

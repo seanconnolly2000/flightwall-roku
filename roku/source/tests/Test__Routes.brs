@@ -151,3 +151,44 @@ sub Test_Routes_Pick()
     UTF_assertEqual(Routes_Pick(aircraft, cache, 0).Count(), 0)
     UTF_assertEqual(Routes_Pick([], cache, 3).Count(), 0)
 end sub
+
+' @Test
+sub Test_Routes_OriginCue()
+    ac = Flights_Blank()
+    ac.lat = 37.7
+    ac.lon = -122.4
+    ac.track = 170.0
+    munich = { found: true, originLat: 48.35, originLon: 11.79 }
+    cue = Routes_OriginCue(ac, munich, 6.8, 120.0, 60.0)
+    UTF_assertTrue(cue.show)
+    UTF_assertTrue(cue.dx > 0.3 and cue.dy < -0.7, "Munich cue should point north-east: " + Str(cue.dx) + "," + Str(cue.dy))
+    UTF_assertTrue(Abs(cue.lengthPx - 120.0) < 0.01, "capped length " + Str(cue.lengthPx))
+    hongKong = { found: true, originLat: 22.31, originLon: 113.91 }
+    cue = Routes_OriginCue(ac, hongKong, 6.8, 120.0, 60.0)
+    UTF_assertTrue(cue.show)
+    UTF_assertTrue(cue.dx < -0.5, "Hong Kong cue should point west: " + Str(cue.dx))
+    ' Heading east toward Concord while the route claims it came from there: hidden.
+    heli = Flights_Blank()
+    heli.lat = 37.87
+    heli.lon = -122.27
+    heli.track = 80.0
+    concord = { found: true, originLat: 37.99, originLon: -122.06 }
+    UTF_assertFalse(Routes_OriginCue(heli, concord, 6.8, 120.0, 60.0).show)
+    ' A nearby origin behind the aircraft gets a line no longer than the distance itself.
+    departed = Flights_Blank()
+    departed.lat = 37.75
+    departed.lon = -122.3
+    departed.track = 30.0
+    sfo = { found: true, originLat: 37.62, originLon: -122.38 }
+    cue = Routes_OriginCue(departed, sfo, 6.8, 120.0, 60.0)
+    UTF_assertTrue(cue.show)
+    UTF_assertTrue(cue.lengthPx > 30 and cue.lengthPx < 120, "length " + Str(cue.lengthPx))
+    UTF_assertTrue(cue.dy > 0.5, "SFO lies south: " + Str(cue.dy))
+    departed.ground = true
+    UTF_assertFalse(Routes_OriginCue(departed, sfo, 6.8, 120.0, 60.0).show)
+    departed.ground = false
+    departed.track = -1.0
+    UTF_assertFalse(Routes_OriginCue(departed, sfo, 6.8, 120.0, 60.0).show)
+    UTF_assertFalse(Routes_OriginCue(ac, invalid, 6.8, 120.0, 60.0).show)
+    UTF_assertFalse(Routes_OriginCue(ac, { found: false, originLat: 0.0, originLon: 0.0 }, 6.8, 120.0, 60.0).show)
+end sub

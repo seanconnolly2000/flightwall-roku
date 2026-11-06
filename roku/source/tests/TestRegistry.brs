@@ -43,6 +43,7 @@ sub FlightWall_RunTests(args as Object)
         Test_Routes_ReconcileSwapsReversedLeg
         Test_Routes_ReconcileKeepsPlausibleRoutes
         Test_Routes_Pick
+        Test_Routes_OriginCue
         Test_Format_Thousands
         Test_Format_Measurements
         Test_Format_Clock
