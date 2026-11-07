@@ -93,6 +93,7 @@ def test_paths_and_default_root() -> None:
     assert paths.roku == Path("/p/roku")
     assert paths.cache == Path("/p/.cache")
     assert paths.dist == Path("/p/dist")
+    assert paths.artwork == Path("/p/store/artwork")
     assert (cli.default_root() / "pyproject.toml").exists()
     assert isinstance(cli.make_device("1.2.3.4", "pw"), device.RokuDevice)
 
@@ -121,6 +122,7 @@ def test_build_data_and_images(project: Path, capsys: pytest.CaptureFixture[str]
     assert run("images", root=project) == 0
     assert (project / "roku" / "images" / "planes" / "plane_090.png").exists()
     assert (project / "roku" / "images" / "planes" / "heli_090.png").exists()
+    assert (project / "store" / "artwork" / "poster-540x405-screensaver.png").exists()
 
 
 def test_build_data_rejects_unknown_region(

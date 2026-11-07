@@ -90,6 +90,14 @@ def test_branded_panel() -> None:
     assert two_lines.tobytes() != images.branded_panel(200, 120, "first\nsecond").tobytes()
 
 
+def test_build_posters(tmp_path: Path) -> None:
+    written = images.build_posters(tmp_path / "artwork")
+    assert written == ["poster-540x405-app.png", "poster-540x405-screensaver.png"]
+    for name in written:
+        with Image.open(tmp_path / "artwork" / name) as poster:
+            assert poster.size == images.POSTER_SIZE
+
+
 def test_splash_filenames() -> None:
     assert images.splash_filename("", "splash_hd.png") == "splash_hd.png"
     assert images.splash_filename("app", "splash_hd.png") == "splash_app_hd.png"

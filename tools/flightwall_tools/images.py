@@ -85,6 +85,31 @@ SPLASH_VARIANTS = {
 }
 
 
+# Channel Store posters (the store tile, 540x405), one per listing so shoppers can tell
+# the app and the screensaver apart before they install either.
+POSTER_SIZE = (540, 405)
+POSTER_VARIANTS = {
+    "app": ("FlightWall App", "Nearby flights, live on your TV"),
+    "screensaver": ("FlightWall Screensaver", "Runs when your Roku is idle"),
+}
+
+
+def poster_filename(variant: str) -> str:
+    return f"poster-{POSTER_SIZE[0]}x{POSTER_SIZE[1]}-{variant}.png"
+
+
+def build_posters(artwork_dir: Path) -> list[str]:
+    """Write the per-listing store posters under artwork_dir and return their file names."""
+    artwork_dir.mkdir(parents=True, exist_ok=True)
+    written: list[str] = []
+    for variant, (title, subtitle) in POSTER_VARIANTS.items():
+        name = poster_filename(variant)
+        poster = branded_panel(POSTER_SIZE[0], POSTER_SIZE[1], subtitle, title=title)
+        poster.convert("RGB").save(artwork_dir / name)
+        written.append(name)
+    return written
+
+
 def splash_filename(variant: str, name: str) -> str:
     """splash_hd.png for the combined build, splash_<variant>_hd.png for a store package."""
     if not variant:
@@ -279,6 +304,10 @@ def branded_panel(
     canvas.alpha_composite(plane, (px, py))
     title_font = _font(max(16, height // 8))
     tw = draw.textlength(title, font=title_font)
+    max_width = width * 0.88
+    if tw > max_width:
+        title_font = _font(max(16, int(height // 8 * max_width / tw)))
+        tw = draw.textlength(title, font=title_font)
     title_xy = ((width - tw) / 2, py + plane.height + height // 30)
     draw.text(title_xy, title, font=title_font, fill=WHITE)
     lines = [line for line in subtitle.split("\n") if line]

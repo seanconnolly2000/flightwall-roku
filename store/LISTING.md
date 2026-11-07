@@ -45,13 +45,17 @@ file below.
 
 | Dashboard slot | File | Size |
 |---|---|---|
-| Channel poster, FHD (the store tile) | `store/artwork/poster-540x405.png` | 540 x 405 |
+| Channel poster, FHD (the store tile), FlightWall App listing | `store/artwork/poster-540x405-app.png` | 540 x 405 |
+| Channel poster, FHD (the store tile), FlightWall screensaver listing | `store/artwork/poster-540x405-screensaver.png` | 540 x 405 |
+| Channel poster, FHD, generic (either listing) | `store/artwork/poster-540x405.png` | 540 x 405 |
 | Channel poster, HD | `store/artwork/poster-290x218.png` | 290 x 218 |
 | Channel poster, SD | `store/artwork/poster-246x140.png` | 246 x 140 |
 | Screenshots (16:9) | `store/screenshots/flightwall-1.jpg`, `flightwall-2.jpg`, `flightwall-settings.jpg` | 1920 x 1080 |
 
 The posters are the same artwork the channel ships as its home-screen icons
-(`roku/images/icon_focus_*.png`), flattened to opaque PNG.
+(`roku/images/icon_focus_*.png`), flattened to opaque PNG. The per-listing 540x405 posters name
+the app and the screensaver so shoppers can tell them apart; `uv run flightwall images`
+regenerates them.
 
 Use the files in `store/screenshots/` only. Anything in `dist/` is a build artifact; `flightwall
 screenshot` now always writes 1920 x 1080, so new captures can go straight into `store/screenshots/`.

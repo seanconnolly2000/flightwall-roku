@@ -17,7 +17,7 @@ from .airports import build_airports
 from .brscheck import check_channel
 from .cities import DEFAULT_MIN_POPULATION, build_cities
 from .device import DeviceError, RokuDevice, run_device_tests
-from .images import build_images, ensure_fhd
+from .images import build_images, build_posters, ensure_fhd
 from .package import build_package, manifest_version
 from .sources import SOURCES, ensure
 from .tiles import DEFAULT_REGIONS, PX_PER_DEG, REGIONS, build_tiles
@@ -41,6 +41,10 @@ class Paths:
     @property
     def cache(self) -> Path:
         return self.root / ".cache"
+
+    @property
+    def artwork(self) -> Path:
+        return self.root / "store" / "artwork"
 
     @property
     def dist(self) -> Path:
@@ -132,6 +136,8 @@ def cmd_build_data(args: argparse.Namespace, paths: Paths) -> int:
 def cmd_images(_args: argparse.Namespace, paths: Paths) -> int:
     written = build_images(paths.roku / "images")
     print(f"Wrote {len(written)} images under {paths.roku / 'images'}")
+    posters = build_posters(paths.artwork)
+    print(f"Wrote {len(posters)} store posters under {paths.artwork}")
     return 0
 
 
