@@ -73,6 +73,23 @@ SPLASH_SIZES = {
     "splash_hd.png": (1280, 720),
     "splash_sd.png": (720, 480),
 }
+# One splash per package type. A store screensaver launched like an app has no Main() and
+# sits on its splash, so that splash says what the screensaver is and how to turn it on.
+SPLASH_VARIANTS = {
+    "": ("FlightWall", "Nearby flights, live on your TV"),
+    "app": ("FlightWall App", "Nearby flights, live on your TV"),
+    "screensaver": (
+        "FlightWall Screensaver",
+        "Runs when your Roku is idle\nTurn it on under Settings > Theme > Screensavers",
+    ),
+}
+
+
+def splash_filename(variant: str, name: str) -> str:
+    """splash_hd.png for the combined build, splash_<variant>_hd.png for a store package."""
+    if not variant:
+        return name
+    return name.replace("splash_", f"splash_{variant}_", 1)
 
 
 def sprite_headings(step: int = SPRITE_STEP_DEG) -> list[int]:
@@ -250,7 +267,10 @@ def _draw_precipitation(draw: ImageDraw.ImageDraw, kind: str, big: float, s: flo
         draw.polygon(bolt, fill=BOLT)
 
 
-def branded_panel(width: int, height: int, subtitle: str = "") -> Image.Image:
+def branded_panel(
+    width: int, height: int, subtitle: str = "", title: str = "FlightWall"
+) -> Image.Image:
+    """Black panel with the plane mark, a title and optional subtitle lines (split on newlines)."""
     canvas = Image.new("RGBA", (width, height), BLACK)
     draw = ImageDraw.Draw(canvas)
     plane = plane_sprite(45, size=max(32, height // 3), color=ACCENT)
@@ -258,14 +278,18 @@ def branded_panel(width: int, height: int, subtitle: str = "") -> Image.Image:
     py = height // 2 - plane.height // 2 - height // 10
     canvas.alpha_composite(plane, (px, py))
     title_font = _font(max(16, height // 8))
-    title = "FlightWall"
     tw = draw.textlength(title, font=title_font)
     title_xy = ((width - tw) / 2, py + plane.height + height // 30)
     draw.text(title_xy, title, font=title_font, fill=WHITE)
-    if subtitle:
+    lines = [line for line in subtitle.split("\n") if line]
+    if lines:
         sub_font = _font(max(10, height // 20))
-        sw = draw.textlength(subtitle, font=sub_font)
-        draw.text(((width - sw) / 2, height - height // 8), subtitle, font=sub_font, fill=MUTED)
+        line_height = max(12, height // 16)
+        y = height - height // 8 - (len(lines) - 1) * line_height // 2
+        for line in lines:
+            sw = draw.textlength(line, font=sub_font)
+            draw.text(((width - sw) / 2, y), line, font=sub_font, fill=MUTED)
+            y += line_height
     return canvas
 
 
@@ -312,9 +336,11 @@ def build_images(images_dir: Path) -> list[str]:
     for name, (w, h) in ICON_SIZES.items():
         branded_panel(w, h).save(images_dir / name)
         written.append(name)
-    for name, (w, h) in SPLASH_SIZES.items():
-        branded_panel(w, h, "Nearby flights, live on your TV").save(images_dir / name)
-        written.append(name)
+    for variant, (title, subtitle) in SPLASH_VARIANTS.items():
+        for name, (w, h) in SPLASH_SIZES.items():
+            file_name = splash_filename(variant, name)
+            branded_panel(w, h, subtitle, title=title).save(images_dir / file_name)
+            written.append(file_name)
     weather = images_dir / "weather"
     weather.mkdir(parents=True, exist_ok=True)
     for kind in WEATHER_KINDS:

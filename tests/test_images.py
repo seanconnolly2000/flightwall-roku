@@ -85,6 +85,16 @@ def test_branded_panel() -> None:
     assert plain.size == (120, 90)
     with_subtitle = images.branded_panel(200, 120, "subtitle")
     assert px(with_subtitle, (0, 0)) == images.BLACK
+    two_lines = images.branded_panel(200, 120, "first\nsecond", title="FlightWall Screensaver")
+    assert two_lines.tobytes() != with_subtitle.tobytes()
+    assert two_lines.tobytes() != images.branded_panel(200, 120, "first\nsecond").tobytes()
+
+
+def test_splash_filenames() -> None:
+    assert images.splash_filename("", "splash_hd.png") == "splash_hd.png"
+    assert images.splash_filename("app", "splash_hd.png") == "splash_app_hd.png"
+    assert images.splash_filename("screensaver", "splash_sd.png") == "splash_screensaver_sd.png"
+    assert set(images.SPLASH_VARIANTS) == {"", "app", "screensaver"}
 
 
 def test_weather_icons() -> None:
@@ -115,8 +125,8 @@ def test_ensure_fhd(tmp_path: Path) -> None:
 
 def test_build_images(tmp_path: Path) -> None:
     written = images.build_images(tmp_path / "images")
-    assert len(written) == 36 + 36 + 6 + len(images.ICON_SIZES) + len(images.SPLASH_SIZES) + len(
-        images.WEATHER_KINDS
-    )
+    assert len(written) == 36 + 36 + 6 + len(images.ICON_SIZES) + len(images.SPLASH_SIZES) * len(
+        images.SPLASH_VARIANTS
+    ) + len(images.WEATHER_KINDS)
     for name in written:
         assert (tmp_path / "images" / name).exists()

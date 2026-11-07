@@ -26,6 +26,19 @@ def test_strip_screensaver_manifest() -> None:
     text = "title=X\nscreensaver_title=X\n  screensaver_private=1\nrsg_version=1.3\n"
     assert package.strip_screensaver_manifest(text) == "title=X\nrsg_version=1.3\n"
     assert package.strip_screensaver_manifest("title=X") == "title=X\n"
+    assert package.strip_screensaver_manifest("title=X\nsplash_screen_sd=pkg:/s.png\n") == (
+        "title=X\nsplash_screen_sd=pkg:/images/splash_app_sd.png\n"
+    )
+
+
+def test_retarget_splash() -> None:
+    text = "splash_screen_hd=pkg:/a.png\n splash_screen_fhd = pkg:/b.png\n"
+    text += "splash_color=#000\nno equals\n"
+    assert package.retarget_splash(text, "screensaver") == (
+        "splash_screen_hd=pkg:/images/splash_screensaver_hd.png\n"
+        "splash_screen_fhd=pkg:/images/splash_screensaver_fhd.png\n"
+        "splash_color=#000\nno equals\n"
+    )
 
 
 def test_strip_key_handler_scripts() -> None:
@@ -47,13 +60,14 @@ def test_manifest_version() -> None:
     assert package.manifest_version("") == "0.0.0"
 
 
-def test_screensaver_manifest_drops_title_and_splash() -> None:
+def test_screensaver_manifest_drops_title_and_swaps_splash() -> None:
     text = (
         "title=X\nsubtitle=Y\nscreensaver_title=X\nmm_icon_focus_hd=pkg:/i.png\n"
         "splash_screen_hd=pkg:/s.png\nsplash_color=#000000\n"
     )
     assert package.screensaver_manifest(text) == (
         "subtitle=Y\nscreensaver_title=X\nmm_icon_focus_hd=pkg:/i.png\n"
+        "splash_screen_hd=pkg:/images/splash_screensaver_hd.png\nsplash_color=#000000\n"
     )
 
 
@@ -93,6 +107,7 @@ def test_build_package_variants(channel: Path, tmp_path: Path) -> None:
         assert "title=Test" not in saver_manifest.replace("screensaver_title=Test", "")
         assert "screensaver_title=Test" in saver_manifest
         assert "mm_icon_focus_hd" in saver_manifest
+        assert "splash_screen_hd=pkg:/images/splash_screensaver_hd.png" in saver_manifest
         scene_xml = zf.read("components/MainScene.xml").decode()
         assert "MainSceneKeys.brs" not in scene_xml
         assert 'uri="pkg:/components/MainScene.brs"' in scene_xml
@@ -107,3 +122,4 @@ def test_build_package_variants(channel: Path, tmp_path: Path) -> None:
         manifest = zf.read("manifest").decode()
         assert "screensaver_" not in manifest
         assert "title=Test" in manifest
+        assert "splash_screen_hd=pkg:/images/splash_app_hd.png" in manifest

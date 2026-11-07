@@ -62,6 +62,12 @@ side-loading. Uploading the screensaver package while its manifest still had `ti
 produced "Channel type is channel but Main() ... is missing" plus three "in-channel screensaver"
 errors.
 
+Each package has its own splash screen: the channel build uses `images/splash_app_*`
+("FlightWall App") and the screensaver build `images/splash_screensaver_*` ("FlightWall
+Screensaver - runs when your Roku is idle - turn it on under Settings > Theme > Screensavers").
+A screensaver has no `Main()`, so when someone opens it from its store page the Roku shows
+that splash and nothing else; the text is what tells them it is working as intended.
+
 Screensavers may not handle remote keys at all: static analysis reports "Your screensaver is
 using a prohibited OnKeyEvent() method" for any `onKeyEvent` function in the package. The key
 handlers therefore live in `components/*Keys.brs` files, which the screensaver build leaves out
