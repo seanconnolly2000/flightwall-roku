@@ -11,7 +11,13 @@ Copy these into the Roku Developer Dashboard (Channel Store Info).
 **Short description (one line):**
 Live map of the aircraft flying around your ZIP code, with routes, airline logos and a 5-day forecast.
 
-**Description:**
+**App description, FlightWall App listing (on-device and online fields, 298 characters):**
+Who is flying over your house right now? FlightWall App plots every aircraft within 10 to 250 miles of your ZIP: callsign, airline logo, route, altitude, aircraft type and owner, helicopters in orange, trails, a 5-day forecast. Free data, no sign-up. Want it while idle? Get FlightWall Screensaver.
+
+**App description, FlightWall screensaver listing (on-device and online fields, 297 characters):**
+Your TV rests, the sky does not. FlightWall Screensaver starts when your Roku idles and plots every aircraft within 10 to 250 miles of your ZIP: callsign, airline logo, route, altitude and type, helicopters in orange, a 5-day forecast. Free data, no sign-up. Want it on demand? Get FlightWall App.
+
+**Long description (optional, for the 1,500-character online field):**
 FlightWall turns your TV into a flight wall. Enter a ZIP code and a radius and it shows every
 aircraft nearby on a minimal dark map: black land, deep-blue water, airports and city labels for
 orientation. Each flight carries its callsign, altitude-tinted icon, airline logo, origin and
