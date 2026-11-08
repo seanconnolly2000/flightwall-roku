@@ -1,7 +1,7 @@
 ' Main-thread helpers shared by the channel, screensaver and screensaver-settings entry points.
 
 ' Builds the scene's launch parameters from the OS launch args.
-function FlightWall_LaunchParams(args as Object, screensaver as Boolean) as Object
+function SkyTraffic_LaunchParams(args as Object, screensaver as Boolean) as Object
     params = { screensaver: screensaver, zip: "", radius: "", poll: "", provider: "" }
     if Util_IsAA(args) then
         if Util_IsString(args.zip) then params.zip = args.zip
@@ -15,7 +15,7 @@ end function
 ' Shows a scene and runs the main event loop until the scene asks to exit or the
 ' OS closes the screen. Also subscribes to the OS memory monitors and forwards
 ' snapshots to the scene's memoryStatus field (once a minute and on every warning).
-sub FlightWall_ShowScene(sceneName as String, params as Object)
+sub SkyTraffic_ShowScene(sceneName as String, params as Object)
     screen = CreateObject("roSGScreen")
     port = CreateObject("roMessagePort")
     screen.SetMessagePort(port)
@@ -23,13 +23,13 @@ sub FlightWall_ShowScene(sceneName as String, params as Object)
     screen.Show()
     scene.observeField("exitRequested", port)
     scene.launchParams = params
-    memory = FlightWall_StartMemoryMonitor(port)
-    scene.memoryStatus = FlightWall_MemorySnapshot(memory, "start")
+    memory = SkyTraffic_StartMemoryMonitor(port)
+    scene.memoryStatus = SkyTraffic_MemorySnapshot(memory, "start")
     closeScreen = false
     while true
         msg = wait(60000, port)
         if msg = invalid then
-            scene.memoryStatus = FlightWall_MemorySnapshot(memory, "periodic")
+            scene.memoryStatus = SkyTraffic_MemorySnapshot(memory, "periodic")
         else
             msgType = Type(msg)
             if msgType = "roSGScreenEvent" then
@@ -40,11 +40,11 @@ sub FlightWall_ShowScene(sceneName as String, params as Object)
                     exit while
                 end if
             else if msgType = "roAppMemoryNotificationEvent" then
-                scene.memoryStatus = FlightWall_MemorySnapshot(memory, "warning")
+                scene.memoryStatus = SkyTraffic_MemorySnapshot(memory, "warning")
             else if msgType = "roDeviceInfoEvent" then
                 info = msg.GetInfo()
                 if Util_IsAA(info) and info.generalMemoryLevel <> invalid then
-                    scene.memoryStatus = FlightWall_MemorySnapshot(memory, "general memory " + Util_Str(info.generalMemoryLevel))
+                    scene.memoryStatus = SkyTraffic_MemorySnapshot(memory, "general memory " + Util_Str(info.generalMemoryLevel))
                 end if
             end if
         end if
@@ -54,7 +54,7 @@ end sub
 
 ' Subscribes to per-app memory warnings (roAppMemoryMonitor) and device-wide low-memory
 ' events (roDeviceInfo). Methods are probed so older OS versions still run.
-function FlightWall_StartMemoryMonitor(port as Object) as Object
+function SkyTraffic_StartMemoryMonitor(port as Object) as Object
     state = { monitor: invalid, deviceInfo: invalid }
     monitor = CreateObject("roAppMemoryMonitor")
     if monitor <> invalid then
@@ -73,7 +73,7 @@ end function
 
 ' {reason, percent (of the per-app limit), availableKb, limit}; -1 / invalid when unknown.
 ' GetChannelMemoryLimit (OS 13+) returns an associative array, kept as-is for the log.
-function FlightWall_MemorySnapshot(state as Object, reason as String) as Object
+function SkyTraffic_MemorySnapshot(state as Object, reason as String) as Object
     snapshot = { reason: reason, percent: -1, availableKb: -1, limit: invalid }
     monitor = state.monitor
     if monitor <> invalid then

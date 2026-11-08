@@ -8,7 +8,7 @@ sub init()
     m.lookupTask = CreateObject("roSGNode", "LookupTask")
     m.lookupTask.observeField("result", "onLookupResult")
     m.audit = Audit_Load()
-    m.panel.message = "FlightWall screensaver settings. Choose Save and apply when done."
+    m.panel.message = "SkyTraffic screensaver settings. Choose Save and apply when done."
     m.panel.focusRow = "zip"
     m.panel.settings = Settings_Load()
     m.panel.setFocus(true)

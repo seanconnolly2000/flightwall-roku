@@ -1,4 +1,4 @@
-# Submitting FlightWall to the Roku Channel Store
+# Submitting SkyTraffic to the Roku Channel Store
 
 Publishing is done in the Roku Developer Dashboard under the account that owns the channel, and
 every public channel goes through Roku's certification review (typically one to three weeks).
@@ -17,7 +17,7 @@ A store package must be signed by a key generated on your Roku. Generate it once
 password: every future update must be signed with the same key.
 
 ```bash
-uv run flightwall genkey --host <roku-ip>
+uv run skytraffic genkey --host <roku-ip>
 ```
 
 Save the printed **password** and **DevID** somewhere safe (a password manager), and put them in
@@ -29,18 +29,18 @@ build the screensaver package (Roku rejects screensavers that also have a `Main(
 install it, and sign it:
 
 ```bash
-uv run flightwall deploy --screensaver-only
-uv run flightwall sign
-uv run flightwall deploy                          # optional: put the interactive build back
+uv run skytraffic deploy --screensaver-only
+uv run skytraffic sign
+uv run skytraffic deploy                          # optional: put the interactive build back
 ```
 
-`sign` saves `dist/flightwall-screensaver-<version>.pkg`; the version in the file name and
+`sign` saves `dist/skytraffic-screensaver-<version>.pkg`; the version in the file name and
 the app name embedded in the package both come from the manifest. Bump `major_version` / `minor_version` /
 `build_version` in `roku/manifest` for every submission.
 
 > **Upload the `.pkg`, never the `.zip`.** The zips in `dist/` are for side-loading only. The
 > Developer Dashboard rejects them with "The file you uploaded is incorrectly packaged". Only a
-> `.pkg` produced by `flightwall sign` (that is, signed by the Roku with your genkey key) is
+> `.pkg` produced by `skytraffic sign` (that is, signed by the Roku with your genkey key) is
 > accepted, for Beta channels and public channels alike.
 
 ## Which package for which submission
@@ -54,8 +54,8 @@ clean package for each, so to publish both you create **two listings**:
 
 | Listing | Build | Produce the `.pkg` |
 |---|---|---|
-| FlightWall (channel) | `--channel-only`: no screensaver code or manifest lines | `flightwall deploy --channel-only` then `flightwall sign --variant channel` |
-| FlightWall screensaver | `--screensaver-only`: no `Main()`, no `title` | `flightwall deploy --screensaver-only` then `flightwall sign` |
+| SkyTraffic (channel) | `--channel-only`: no screensaver code or manifest lines | `skytraffic deploy --channel-only` then `skytraffic sign --variant channel` |
+| SkyTraffic screensaver | `--screensaver-only`: no `Main()`, no `title` | `skytraffic deploy --screensaver-only` then `skytraffic sign` |
 
 The default combined build (both `title` and `screensaver_title`) is only for local
 side-loading. Uploading the screensaver package while its manifest still had `title` is what
@@ -63,7 +63,7 @@ produced "Channel type is channel but Main() ... is missing" plus three "in-chan
 errors.
 
 Each package has its own splash screen: the channel build uses `images/splash_app_*`
-("FlightWall App") and the screensaver build `images/splash_screensaver_*` ("FlightWall
+("SkyTraffic App") and the screensaver build `images/splash_screensaver_*` ("SkyTraffic
 Screensaver - runs when your Roku is idle - turn it on under Settings > Theme > Screensavers").
 A screensaver has no `Main()`, so when someone opens it from its store page the Roku shows
 that splash and nothing else; the text is what tells them it is working as intended.
@@ -80,7 +80,7 @@ Screensaver". It is a warning, not an error; the package type is what Roku uses.
 Other static-analysis requirements already met by the current manifest and code: `rsg_version=1.3`
 with minimum Roku OS 15.1, no `subtitle` attribute, no `InitClientCertificates()`, and the
 roAppMemoryMonitor / low-memory event integration (mandatory for certification since
-October 2026). Name the channel plainly "FlightWall": names containing "Roku" are flagged.
+October 2026). Name the channel plainly "SkyTraffic": names containing "Roku" are flagged.
 
 ## Beta channel (optional first step)
 
@@ -88,9 +88,9 @@ A Beta channel lets up to 20 people install the channel from a link without side
 certification review. It expires after 120 days and cannot be renewed (create a new one). Use
 **Manage My Channels > Add Channel > Beta** and upload a `.pkg`:
 
-- `dist/flightwall-channel-<version>.pkg`: the interactive channel (map, settings screen, Play for the log),
+- `dist/skytraffic-channel-<version>.pkg`: the interactive channel (map, settings screen, Play for the log),
   for a Beta channel of type "channel".
-- `dist/flightwall-screensaver-<version>.pkg`: the screensaver-only build, for a Beta channel of type
+- `dist/skytraffic-screensaver-<version>.pkg`: the screensaver-only build, for a Beta channel of type
   "screensaver".
 
 ## From beta to public
@@ -99,7 +99,7 @@ A beta app cannot be promoted or converted; Roku's guide says to "create a publi
 tested package file" once testing is done. The beta keeps running separately until it expires
 (120 days). So:
 
-1. **Manage My Channels > Add Channel > Developer SDK > Public.** Name it FlightWall (no "Roku"
+1. **Manage My Channels > Add Channel > Developer SDK > Public.** Name it SkyTraffic (no "Roku"
    in the name), distribution United States, language English.
 2. Re-enter the listing: copy the text from `store/LISTING.md`, upload the posters from
    `store/artwork/` and the screenshots from `store/screenshots/`, set the privacy, terms and
@@ -125,14 +125,14 @@ The beta listing can be deleted once the public app is live, or left to expire.
 
 In the Developer Dashboard choose **Manage My Channels > Add Channel > Developer SDK**, then:
 
-1. **Properties**: name FlightWall; classification Screensaver; language English; countries United States.
+1. **Properties**: name SkyTraffic; classification Screensaver; language English; countries United States.
 2. **Channel Store Info**: paste the text from `store/LISTING.md`, upload the channel posters
    (`roku/images/icon_focus_*.png`), the 16:9 screenshots from `store/screenshots/` (all exactly
    1920 x 1080; the dashboard rejects any other size, and files in `dist/` are not screenshots),
    and the privacy policy and terms of service URLs (`store/PRIVACY.md`, `store/TERMS.md` on
    GitHub), the support URL (`store/SUPPORT.md`) and support email. Content rating: all audiences.
 3. **Monetization**: none.
-4. **Package Upload**: upload `dist/flightwall-screensaver-<version>.pkg` (or `flightwall-channel-<version>.pkg`
+4. **Package Upload**: upload `dist/skytraffic-screensaver-<version>.pkg` (or `skytraffic-channel-<version>.pkg`
    for a channel-type listing), set the version to match the manifest, and set the minimum
    firmware to Roku OS 15.1, which `rsg_version=1.3` requires.
 5. **Static Analysis**: run it and fix anything it flags.
@@ -140,7 +140,7 @@ In the Developer Dashboard choose **Manage My Channels > Add Channel > Developer
 
 ## 4. Things certification is likely to ask about
 
-- **Screensaver rules**: no user input, no video or audio. FlightWall's screensaver build meets
+- **Screensaver rules**: no user input, no video or audio. SkyTraffic's screensaver build meets
   this; its settings live in the separate "Change screensaver settings" screen
   (`RunScreenSaverSettings`).
 - **Third-party services**: Roku asks publishers to have the right to use the services an app

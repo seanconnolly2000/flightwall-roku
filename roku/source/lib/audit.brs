@@ -2,7 +2,7 @@
 ' Kept in its own registry section, separate from application settings.
 
 function Audit_Section() as String
-    return "flightwall_audit"
+    return "skytraffic_audit"
 end function
 
 function Audit_Max() as Integer

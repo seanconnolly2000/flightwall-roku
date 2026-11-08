@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from flightwall_tools import images
+from skytraffic_tools import images
 
 
 def px(image: Image.Image, xy: tuple[int, int]) -> tuple[int, ...]:
@@ -85,15 +85,17 @@ def test_branded_panel() -> None:
     assert plain.size == (120, 90)
     with_subtitle = images.branded_panel(200, 120, "subtitle")
     assert px(with_subtitle, (0, 0)) == images.BLACK
-    two_lines = images.branded_panel(200, 120, "first\nsecond", title="FlightWall Screensaver")
+    two_lines = images.branded_panel(200, 120, "first\nsecond", title="SkyTraffic Screensaver")
     assert two_lines.tobytes() != with_subtitle.tobytes()
     assert two_lines.tobytes() != images.branded_panel(200, 120, "first\nsecond").tobytes()
 
 
 def test_build_posters(tmp_path: Path) -> None:
     written = images.build_posters(tmp_path / "artwork")
-    assert written == ["poster-540x405-app.png", "poster-540x405-screensaver.png"]
-    for name in written:
+    assert written[:2] == ["poster-540x405-app.png", "poster-540x405-screensaver.png"]
+    assert len(written) == 2 + len(images.ICON_SIZES)
+    assert "poster-540x405.png" in written
+    for name in written[:2]:
         with Image.open(tmp_path / "artwork" / name) as poster:
             assert poster.size == images.POSTER_SIZE
 

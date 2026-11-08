@@ -1,4 +1,4 @@
-"""Command-line entry point: `flightwall <command>`."""
+"""Command-line entry point: `skytraffic <command>`."""
 
 from __future__ import annotations
 
@@ -150,11 +150,11 @@ def cmd_check(_args: argparse.Namespace, paths: Paths) -> int:
 
 
 def _package_name(with_tests: bool, screensaver_only: bool, channel_only: bool = False) -> str:
-    base = "flightwall"
+    base = "skytraffic"
     if screensaver_only:
-        base = "flightwall-screensaver"
+        base = "skytraffic-screensaver"
     elif channel_only:
-        base = "flightwall-channel"
+        base = "skytraffic-channel"
     return f"{base}-tests.zip" if with_tests else f"{base}.zip"
 
 
@@ -181,7 +181,7 @@ def _package(
 
 def cmd_package(args: argparse.Namespace, paths: Paths) -> int:
     if check_channel(paths.roku):
-        print("Static checks failed; run `flightwall check` for details")
+        print("Static checks failed; run `skytraffic check` for details")
         return 1
     _package(
         paths,
@@ -195,7 +195,7 @@ def cmd_package(args: argparse.Namespace, paths: Paths) -> int:
 
 def cmd_deploy(args: argparse.Namespace, paths: Paths, factory: DeviceFactory) -> int:
     if check_channel(paths.roku):
-        print("Static checks failed; run `flightwall check` for details")
+        print("Static checks failed; run `skytraffic check` for details")
         return 1
     archive = _package(
         paths,
@@ -215,7 +215,7 @@ def cmd_deploy(args: argparse.Namespace, paths: Paths, factory: DeviceFactory) -
 
 def cmd_run_tests(args: argparse.Namespace, paths: Paths, factory: DeviceFactory) -> int:
     if check_channel(paths.roku):
-        print("Static checks failed; run `flightwall check` for details")
+        print("Static checks failed; run `skytraffic check` for details")
         return 1
     archive = _package(paths, with_tests=True)
     device = factory(args.host, resolve_password(args.password))
@@ -266,9 +266,9 @@ def cmd_sign(args: argparse.Namespace, paths: Paths, factory: DeviceFactory) -> 
         return EXIT_USAGE
     device = factory(args.host, resolve_password(args.password))
     version = manifest_version((paths.roku / "manifest").read_text(encoding="utf-8"))
-    app_name = args.app_name or f"FlightWall/{version}"
+    app_name = args.app_name or f"SkyTraffic/{version}"
     out_path = (
-        Path(args.out) if args.out else paths.dist / f"flightwall-{args.variant}-{version}.pkg"
+        Path(args.out) if args.out else paths.dist / f"skytraffic-{args.variant}-{version}.pkg"
     )
     try:
         saved = device.sign(app_name, signing_password, out_path)
@@ -343,7 +343,7 @@ def _add_data_args(parser: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="flightwall", description=__doc__)
+    parser = argparse.ArgumentParser(prog="skytraffic", description=__doc__)
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument("--project-root", help="project directory (default: this checkout)")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -387,9 +387,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="which build is installed on the Roku; names the output file",
     )
     p.add_argument(
-        "--app-name", help="name/version embedded in the package (default FlightWall/<version>)"
+        "--app-name", help="name/version embedded in the package (default SkyTraffic/<version>)"
     )
-    p.add_argument("--out", help="output path (default dist/flightwall-<variant>-<version>.pkg)")
+    p.add_argument("--out", help="output path (default dist/skytraffic-<variant>-<version>.pkg)")
 
     p = sub.add_parser("delete", help="remove the side-loaded channel from the Roku")
     _add_device_args(p)

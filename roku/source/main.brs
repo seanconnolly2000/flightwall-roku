@@ -5,9 +5,9 @@
 ' can pre-set the ZIP code, radius, poll interval and data source (adsbfi, adsblol, opensky).
 
 sub Main(args as Object)
-    if args <> invalid and args.RunTests = "true" and Type(FlightWall_RunTests) = "Function" then
-        FlightWall_RunTests(args)
+    if args <> invalid and args.RunTests = "true" and Type(SkyTraffic_RunTests) = "Function" then
+        SkyTraffic_RunTests(args)
         return
     end if
-    FlightWall_ShowScene("MainScene", FlightWall_LaunchParams(args, false))
+    SkyTraffic_ShowScene("MainScene", SkyTraffic_LaunchParams(args, false))
 end sub

@@ -1,7 +1,7 @@
 ' Registers every on-device test with Roku's Unit Testing Framework.
-' Only present in the test build (`flightwall package --with-tests`).
+' Only present in the test build (`skytraffic package --with-tests`).
 
-sub FlightWall_RunTests(args as Object)
+sub SkyTraffic_RunTests(args as Object)
     runner = TestRunner()
     runner.SetFunctions([
         Test_Util_FloatStr

@@ -170,7 +170,7 @@ end sub
 sub onMapWarning()
     text = m.map.warning
     if text = "" then return
-    ? "[FlightWall] warning: " + text
+    ? "[SkyTraffic] warning: " + text
     logEvent("warning", text)
     Audit_Save(m.audit)
 end sub
@@ -202,9 +202,9 @@ sub start()
     applySettingsToViews()
     if not Settings_IsZipValid(Util_Str(m.settings.zip)) then
         if m.screensaver then
-            m.panel.banner = "Set your ZIP code first. On the Roku go to Settings > Theme > Screensavers, select FlightWall, then choose Change screensaver settings."
+            m.panel.banner = "Set your ZIP code first. On the Roku go to Settings > Theme > Screensavers, select SkyTraffic, then choose Change screensaver settings."
         else
-            openSettings("Welcome to FlightWall. Enter your ZIP code and pick a radius to begin.", "zip")
+            openSettings("Welcome to SkyTraffic. Enter your ZIP code and pick a radius to begin.", "zip")
         end if
         return
     end if

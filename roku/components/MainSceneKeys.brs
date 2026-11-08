@@ -3,7 +3,7 @@
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
-    ? "[FlightWall] key " + key
+    ? "[SkyTraffic] key " + key
     if m.screensaver then return false
     if m.settingsPanel.visible then return false
     if key = "options" or key = "OK" then

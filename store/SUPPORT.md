@@ -1,16 +1,16 @@
-# FlightWall support
+# SkyTraffic support
 
 **Support email:** <mranonymous2000@yahoo.com>
-**Bug reports and questions:** <https://github.com/seanconnolly2000/flightwall-roku/issues>
+**Bug reports and questions:** <https://github.com/seanconnolly2000/skytraffic-roku/issues>
 
-FlightWall shows the aircraft flying around your ZIP code on a minimal dark map, with routes,
+SkyTraffic shows the aircraft flying around your ZIP code on a minimal dark map, with routes,
 airline logos and a five-day forecast. It runs as a Roku channel and as a Roku screensaver.
 
 ## What you need
 
 - A Roku player or Roku TV on **Roku OS 15.1 or later** (Settings > System > About shows the
   version; Settings > System > System update installs the latest).
-- An internet connection. FlightWall talks only to the free services listed in the
+- An internet connection. SkyTraffic talks only to the free services listed in the
   [privacy policy](PRIVACY.md); no account or API key is needed.
 - A **US ZIP code**. The map, airport and ZIP data cover the United States (Hawaii included).
 - A remote with an `*` (Options) button for the settings screen. Remote keys cannot be injected
@@ -19,7 +19,7 @@ airline logos and a five-day forecast. It runs as a Roku channel and as a Roku s
 ## Installing
 
 **From the Roku Channel Store** (once published): on the Roku, Home > Streaming Channels >
-Search Channels, search for "FlightWall", choose Add Channel. Or add it from
+Search Channels, search for "SkyTraffic", choose Add Channel. Or add it from
 <https://channelstore.roku.com/> in a browser while signed in to your Roku account; it installs
 on your devices within a few minutes (Home > Settings > System > System update > Check now
 forces it).
@@ -29,11 +29,11 @@ the Roku account linked to your device, and accept. Beta channels expire 120 day
 are created.
 
 **Side-loading the source** (developers): see the project README. In short, enable developer
-mode on the Roku, then run `uv run flightwall deploy` from a checkout of the repository.
+mode on the Roku, then run `uv run skytraffic deploy` from a checkout of the repository.
 
 ## First-time setup
 
-1. Open FlightWall. The settings screen appears the first time.
+1. Open SkyTraffic. The settings screen appears the first time.
 2. Press **OK** on **ZIP code**, type your 5-digit ZIP on the on-screen keyboard, choose OK.
 3. Press **OK** on **Radius** until it shows the distance you want (10 to 250 miles).
    25 to 50 miles suits most locations; use less near a busy hub.
@@ -44,13 +44,13 @@ Everything can be changed later: press `*` (Options) or **OK** on the main scree
 
 ## Using it as the screensaver
 
-1. Install the **FlightWall screensaver** from the Channel Store (it is listed under
+1. Install the **SkyTraffic screensaver** from the Channel Store (it is listed under
    Screensavers), or, when side-loading, the screensaver build.
-2. On the Roku go to **Settings > Theme > Screensavers** and select **FlightWall**.
+2. On the Roku go to **Settings > Theme > Screensavers** and select **SkyTraffic**.
 3. Still under Screensavers, set **Wait time** to how long the Roku should idle before it starts.
-4. Choose **Change screensaver settings** on the FlightWall entry to set the ZIP code, radius and
+4. Choose **Change screensaver settings** on the SkyTraffic entry to set the ZIP code, radius and
    other options. A screensaver installed from the Channel Store keeps its own settings, separate
-   from the FlightWall app, so set the ZIP code in each one you install.
+   from the SkyTraffic app, so set the ZIP code in each one you install.
 
 Any button press ends the screensaver, as with every Roku screensaver.
 
@@ -77,7 +77,7 @@ request and its result), **Up/Down** changes the radius, **Back** exits.
 
 - **Plane colour**: amber below 10,000 ft, white up to 25,000 ft, blue above; grey on the ground.
 - **Route line** (for example `SFO > LAX`) comes from a public flight-number database. When the
-  listed leg does not match where the aircraft actually is or is heading, FlightWall hides it
+  listed leg does not match where the aircraft actually is or is heading, SkyTraffic hides it
   and shows "Route unknown" rather than a wrong route.
 - **Faint line behind a plane** points back toward its origin airport (or back along its track
   when the route is unknown).
@@ -90,16 +90,16 @@ another data source in settings. Private and general-aviation aircraft often sho
 registration (N-number) and no route.
 
 **"Rate limited" banner or settings opening on the data source row.** The free feed has asked
-this device to slow down. FlightWall backs off automatically. Switch to another free source, or
+this device to slow down. SkyTraffic backs off automatically. Switch to another free source, or
 create a free OpenSky Network account, add its client ID and secret in settings, and choose
 OpenSky as the source for a much higher daily allowance.
 
-**Settings do not open when pressing `*`.** Make sure the FlightWall channel (not the
+**Settings do not open when pressing `*`.** Make sure the SkyTraffic channel (not the
 screensaver) is in the foreground; screensavers take no input. If a settings screen is already
 open, Back closes it.
 
 **The channel closes by itself after about two hours.** Roku OS exits any channel left without a
-remote press for two hours. For an always-on display use FlightWall as the screensaver, which the
+remote press for two hours. For an always-on display use SkyTraffic as the screensaver, which the
 OS runs itself during idle time.
 
 **Blank or blue screen on the TV or receiver.** This is the HDMI link, not the app. Power a
@@ -110,7 +110,7 @@ Auto-adjust display refresh rate.
 **Everything disappears except the circle and an empty panel.** The Roku ran out of the texture
 memory it shares with its home screen, so it stopped drawing updates. Press a button to leave the
 screensaver and start it again; the activity log (Play, in the channel) will show "texture memory
-low". Avoid running the FlightWall channel and the FlightWall screensaver at the same time, and
+low". Avoid running the SkyTraffic channel and the SkyTraffic screensaver at the same time, and
 keep the radius at 50 miles or less on a streaming stick.
 
 **Forecast missing.** The forecast loads a few seconds after the first aircraft and refreshes
@@ -120,7 +120,7 @@ hourly; if the weather service is unreachable it retries every ten minutes.
 
 ## Privacy and terms
 
-FlightWall stores your settings only on the Roku and sends only your ZIP's approximate
+SkyTraffic stores your settings only on the Roku and sends only your ZIP's approximate
 coordinates to the data services. Details: [privacy policy](PRIVACY.md) and
 [terms of service](TERMS.md).
 

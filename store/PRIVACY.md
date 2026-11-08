@@ -1,8 +1,8 @@
-# FlightWall privacy policy
+# SkyTraffic privacy policy
 
 _Last updated: November 1, 2026_
 
-FlightWall is a Roku channel and screensaver that shows aircraft flying near a location you
+SkyTraffic is a Roku channel and screensaver that shows aircraft flying near a location you
 choose. It is free, has no accounts, and collects no personal information.
 
 ## What the app stores
@@ -28,7 +28,7 @@ connection, as with any web request.
   registry entry (registered owner, model) for an aircraft's ICAO address.
 
 Aircraft registry data (for example the FAA registry) is public record and may name an
-individual as the registered owner of a private aircraft. FlightWall shows such entries as
+individual as the registered owner of a private aircraft. SkyTraffic shows such entries as
 "Private owner" by default; a setting lets the viewer display the registered name instead.
 Companies, agencies and airlines are always shown by name.
 - images.kiwi.com: airline logo images by airline code.
@@ -42,9 +42,9 @@ anyone other than the services listed above, and only to fulfil the request you 
 ## Open source
 
 The complete source code is available at
-<https://github.com/seanconnolly2000/flightwall-roku>, so anything stated here can be verified.
+<https://github.com/seanconnolly2000/skytraffic-roku>, so anything stated here can be verified.
 
 ## Contact
 
 Email <mranonymous2000@yahoo.com> or open an issue at
-<https://github.com/seanconnolly2000/flightwall-roku/issues>.
+<https://github.com/seanconnolly2000/skytraffic-roku/issues>.

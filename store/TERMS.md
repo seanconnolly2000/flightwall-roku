@@ -1,23 +1,23 @@
-# FlightWall terms of service
+# SkyTraffic terms of service
 
 _Last updated: November 1, 2026_
 
-FlightWall is a free Roku channel and screensaver that displays aircraft positions and a weather
+SkyTraffic is a free Roku channel and screensaver that displays aircraft positions and a weather
 forecast for a location you choose. By installing or using it you agree to these terms.
 
 ## 1. Informational use only
 
-FlightWall is for entertainment and general interest. Aircraft positions, routes, airline
+SkyTraffic is for entertainment and general interest. Aircraft positions, routes, airline
 details and forecasts come from third-party, community-run services and may be delayed,
-incomplete or wrong. Do not use FlightWall for navigation, aviation operations, safety-related
+incomplete or wrong. Do not use SkyTraffic for navigation, aviation operations, safety-related
 decisions, or any purpose where an error could cause harm.
 
 ## 2. Third-party services
 
 The app retrieves data from adsb.lol, adsb.fi, OpenSky Network, adsbdb.com, Open-Meteo and the
 Kiwi.com image CDN. Those services have their own terms, which apply to your use of their data
-through FlightWall. In particular, OpenSky Network data is provided for non-commercial use. The
-services may change, rate-limit or discontinue access at any time, and FlightWall may stop
+through SkyTraffic. In particular, OpenSky Network data is provided for non-commercial use. The
+services may change, rate-limit or discontinue access at any time, and SkyTraffic may stop
 showing some or all information as a result.
 
 ## 3. Your settings
@@ -28,8 +28,8 @@ are your responsibility. Removing the channel removes them. See the
 
 ## 4. Open source
 
-FlightWall's source code is available under the MIT License at
-<https://github.com/seanconnolly2000/flightwall-roku>. The MIT License governs the software
+SkyTraffic's source code is available under the MIT License at
+<https://github.com/seanconnolly2000/skytraffic-roku>. The MIT License governs the software
 itself; these terms govern your use of the published channel.
 
 ## 5. No warranty; limitation of liability
@@ -42,10 +42,10 @@ displays.
 ## 6. Changes
 
 These terms may be updated from time to time; the current version is always at
-<https://github.com/seanconnolly2000/flightwall-roku/blob/main/store/TERMS.md>. Continued use
+<https://github.com/seanconnolly2000/skytraffic-roku/blob/main/store/TERMS.md>. Continued use
 after a change means you accept the updated terms.
 
 ## 7. Contact
 
 Email <mranonymous2000@yahoo.com> or open an issue at
-<https://github.com/seanconnolly2000/flightwall-roku/issues>.
+<https://github.com/seanconnolly2000/skytraffic-roku/issues>.

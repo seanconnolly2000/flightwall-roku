@@ -13,7 +13,7 @@
   <children>
     <Rectangle id="backdrop" width="1280" height="720" color="0x000000DD"/>
     <Rectangle id="card" translation="[200, 40]" width="880" height="640" color="0x0D1117FF">
-      <Label id="title" translation="[40, 24]" width="800" color="0xFFFFFFFF" text="FlightWall settings"/>
+      <Label id="title" translation="[40, 24]" width="800" color="0xFFFFFFFF" text="SkyTraffic settings"/>
       <Label id="messageLabel" translation="[40, 64]" width="800" height="60" wrap="true" color="0xFFD166FF"/>
       <LabelList id="list" translation="[40, 132]" itemSize="[800, 38]" itemSpacing="[0, 2]" numRows="12" color="0xC9D1D9FF" focusedColor="0xFFFFFFFF" vertFocusAnimationStyle="floatingFocus"/>
       <Label id="help" translation="[40, 600]" width="800" color="0x6E7681FF" text="OK changes a row  -  Back cancels  -  choose Save and apply when done"/>

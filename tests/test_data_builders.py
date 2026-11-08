@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from conftest import AIRLINES_DAT, AIRPORTS_CSV, GAZETTEER_TXT
-from flightwall_tools import airlines, airports, cities, zips
+from skytraffic_tools import airlines, airports, cities, zips
 
 
 def test_parse_openflights_prefers_active_codes() -> None:

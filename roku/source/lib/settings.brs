@@ -2,7 +2,7 @@
 ' Every value is stored as a string because roRegistrySection only stores strings.
 
 function Settings_Section() as String
-    return "flightwall"
+    return "skytraffic"
 end function
 
 function Settings_Defaults() as Object

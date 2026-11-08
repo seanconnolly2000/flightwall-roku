@@ -7,7 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-USER_AGENT = "FlightWall-tools/1.0"
+USER_AGENT = "SkyTraffic-tools/1.0"
 NATURAL_EARTH = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/"
 
 Fetcher = Callable[[str], bytes]

@@ -89,9 +89,9 @@ function Format_AircraftType(ac as Object) as String
 end function
 
 ' The one-line hint under the panel. Screensavers take no remote input, so theirs points at
-' the Roku menu whose FlightWall entry offers "Change screensaver settings". Both strings
+' the Roku menu whose SkyTraffic entry offers "Change screensaver settings". Both strings
 ' must fit the 520 px panel at 15 px; Test__Format measures them with the system font.
 function Format_Hint(screensaver as Boolean) as String
-    if screensaver then return "ZIP, radius and options: Settings > Theme > Screensavers > FlightWall"
+    if screensaver then return "ZIP, radius and options: Settings > Theme > Screensavers > SkyTraffic"
     return "Press * for settings    Play: activity log    Up/Down: radius"
 end function

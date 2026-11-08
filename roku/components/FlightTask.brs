@@ -32,7 +32,7 @@ sub runTask()
         return
     end if
     result.provider = Util_Str(req.provider)
-    headers = { "User-Agent": "FlightWall-Roku/1.0", "Accept": "application/json" }
+    headers = { "User-Agent": "SkyTraffic-Roku/1.0", "Accept": "application/json" }
 
     token = Util_Str(req.token)
     tokenExpiry = Util_ToInt(req.tokenExpiry, 0)
@@ -71,7 +71,7 @@ sub runTask()
         result.aircraft = Flights_Parse(result.provider, response.body, Util_ToFloat(req.lat), Util_ToFloat(req.lon), Util_ToFloat(req.radius, 50))
         Task_ApplyAirlineTable(result.aircraft)
         result.credits = Http_HeaderInt(response.headers, "x-rate-limit-remaining")
-        lookupHeaders = { "User-Agent": "FlightWall-Roku/1.0", "Accept": "application/json" }
+        lookupHeaders = { "User-Agent": "SkyTraffic-Roku/1.0", "Accept": "application/json" }
         lookups = req.routeLookups
         if Util_IsArray(lookups) then
             for each callsign in lookups
@@ -118,7 +118,7 @@ end sub
 ' OAuth2 client-credentials token for a free OpenSky account.
 function Task_FetchOpenSkyToken(clientId as String, clientSecret as String) as Object
     body = "grant_type=client_credentials&client_id=" + Http_UrlEncode(clientId) + "&client_secret=" + Http_UrlEncode(clientSecret)
-    headers = { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "FlightWall-Roku/1.0" }
+    headers = { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SkyTraffic-Roku/1.0" }
     response = Http_Request(m.http, "POST", "https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token", headers, body, 15000)
     if response.status <> 200 then return { ok: false, token: "", expiresIn: 0, message: "HTTP " + response.status.ToStr() }
     json = ParseJson(response.body)

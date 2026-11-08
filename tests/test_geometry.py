@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from flightwall_tools.geometry import BBox, iter_points, iter_polygons, ring_bbox
+from skytraffic_tools.geometry import BBox, iter_points, iter_polygons, ring_bbox
 
 
 def test_bbox_intersects() -> None:

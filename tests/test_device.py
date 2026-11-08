@@ -8,7 +8,7 @@ from typing import Any, Self
 
 import pytest
 
-from flightwall_tools import device
+from skytraffic_tools import device
 
 SUCCESS_HTML = "<html><body><font color='red'>Install Success.</font></body></html>"
 FAILURE_HTML = "<html><body><font color='red'>Install Failure: bad zip</font></body></html>"
@@ -66,7 +66,7 @@ def make_device(
     post_status: int = 200,
     inspect_html: str = '<img src="pkgs/dev.png?time=1">',
     image_bytes: bytes = b"\x89PNGfake",
-    package_html: str = '<a href="pkgs/FlightWall.pkg">download</a>',
+    package_html: str = '<a href="pkgs/SkyTraffic.pkg">download</a>',
     package_bytes: bytes = b"PKG" * 500,
 ) -> tuple[device.RokuDevice, list[urllib.request.Request]]:
     requests: list[urllib.request.Request] = []
@@ -248,22 +248,22 @@ def test_genkey() -> None:
 
 def test_sign(tmp_path: Path) -> None:
     dev, requests = make_device()
-    out = dev.sign("FlightWall/1.0", "s3cret", tmp_path / "out" / "fw.pkg")
+    out = dev.sign("SkyTraffic/1.0", "s3cret", tmp_path / "out" / "fw.pkg")
     assert out.read_bytes() == b"PKG" * 500
     post = requests[1]
     assert post.full_url == "http://10.0.0.5:80/plugin_package"
     post_body = post.data
     assert isinstance(post_body, bytes)
-    assert b'name="app_name"\r\n\r\nFlightWall/1.0' in post_body
+    assert b'name="app_name"\r\n\r\nSkyTraffic/1.0' in post_body
     assert b'name="passwd"\r\n\r\ns3cret' in post_body
-    assert requests[3].full_url == "http://10.0.0.5:80/pkgs/FlightWall.pkg"
+    assert requests[3].full_url == "http://10.0.0.5:80/pkgs/SkyTraffic.pkg"
 
     dev, _ = make_device(package_html="<p>Failed: wrong password</p>")
     with pytest.raises(device.DeviceError, match="packaging failed"):
-        dev.sign("FlightWall/1.0", "bad", tmp_path / "a.pkg")
+        dev.sign("SkyTraffic/1.0", "bad", tmp_path / "a.pkg")
     dev, _ = make_device(package_bytes=b"<html>oops</html>")
     with pytest.raises(device.DeviceError, match="did not return a signed package"):
-        dev.sign("FlightWall/1.0", "s3cret", tmp_path / "b.pkg")
+        dev.sign("SkyTraffic/1.0", "s3cret", tmp_path / "b.pkg")
 
 
 def test_ecp_commands() -> None:

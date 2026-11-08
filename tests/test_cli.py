@@ -10,8 +10,8 @@ import pytest
 from PIL import Image
 
 from conftest import fake_sources, make_channel, tiny_jpeg
-from flightwall_tools import cli, device, package
-from flightwall_tools.device import RokuDevice
+from skytraffic_tools import cli, device, package
+from skytraffic_tools.device import RokuDevice
 
 TEST_OUTPUT = (
     "***   Total  =  1 ; Passed  =  1 ; Failed   =  0 ; Skipped   =  0 ; Crashes  =  0\n"
@@ -58,7 +58,7 @@ def fake_factory(
                 challenge = 'Digest qop="auth", realm="rokudev", nonce="1"'
                 return device.HttpResponse(401, {"www-authenticate": challenge}, b"")
             if url.endswith("/plugin_package"):
-                return device.HttpResponse(200, {}, b'<a href="pkgs/FlightWall.pkg">pkg</a>')
+                return device.HttpResponse(200, {}, b'<a href="pkgs/SkyTraffic.pkg">pkg</a>')
             return device.HttpResponse(200, {}, installer_html.encode())
 
         return RokuDevice(
@@ -135,9 +135,9 @@ def test_build_data_rejects_unknown_region(
 def test_check_package_and_deploy(project: Path, capsys: pytest.CaptureFixture[str]) -> None:
     assert run("check", root=project) == 0
     assert run("package", root=project) == 0
-    assert (project / "dist" / "flightwall.zip").exists()
+    assert (project / "dist" / "skytraffic.zip").exists()
     assert run("package", "--channel-only", root=project) == 0
-    assert (project / "dist" / "flightwall-channel.zip").exists()
+    assert (project / "dist" / "skytraffic-channel.zip").exists()
     assert (
         run(
             "package",
@@ -297,7 +297,7 @@ def test_genkey_and_sign_commands(project: Path, capsys: pytest.CaptureFixture[s
         == 0
     )
     version = package.manifest_version((project / "roku" / "manifest").read_text())
-    saved = project / "dist" / f"flightwall-screensaver-{version}.pkg"
+    saved = project / "dist" / f"skytraffic-screensaver-{version}.pkg"
     assert saved.read_bytes() == b"PKG" * 500
     assert "Saved signed package" in capsys.readouterr().out
     assert (
@@ -316,7 +316,7 @@ def test_genkey_and_sign_commands(project: Path, capsys: pytest.CaptureFixture[s
         )
         == 0
     )
-    assert (project / "dist" / f"flightwall-channel-{version}.pkg").exists()
+    assert (project / "dist" / f"skytraffic-channel-{version}.pkg").exists()
     custom = project / "custom.pkg"
     assert (
         run(
@@ -330,7 +330,7 @@ def test_genkey_and_sign_commands(project: Path, capsys: pytest.CaptureFixture[s
             "--out",
             str(custom),
             "--app-name",
-            "FlightWall/9.9",
+            "SkyTraffic/9.9",
             root=project,
             factory=fake_factory(),
         )
@@ -390,7 +390,7 @@ def test_host_and_secrets_from_dotenv(
     )
     assert run("screenshot", root=project, factory=fake_factory()) == 0
     assert run("sign", root=project, factory=fake_factory()) == 0
-    assert list((project / "dist").glob("flightwall-screensaver-*.pkg"))
+    assert list((project / "dist").glob("skytraffic-screensaver-*.pkg"))
     for key in (cli.HOST_ENV, cli.PASSWORD_ENV, cli.SIGNING_PASSWORD_ENV):
         monkeypatch.delenv(key)
 
@@ -411,9 +411,9 @@ def test_commands_refuse_broken_channel(project: Path, capsys: pytest.CaptureFix
 
 def test_all_command(project: Path) -> None:
     assert run("all", "--regions", "conus", "--px-per-deg", "2", root=project) == 0
-    assert (project / "dist" / "flightwall.zip").exists()
-    assert (project / "dist" / "flightwall-channel.zip").exists()
-    assert (project / "dist" / "flightwall-screensaver.zip").exists()
+    assert (project / "dist" / "skytraffic.zip").exists()
+    assert (project / "dist" / "skytraffic-channel.zip").exists()
+    assert (project / "dist" / "skytraffic-screensaver.zip").exists()
     assert run("all", "--regions", "nowhere", root=project) == 2
     (project / "roku" / "source" / "lib.brs").write_text("sub broken()\n", encoding="utf-8")
     assert run("all", "--regions", "conus", "--px-per-deg", "2", root=project) == 1

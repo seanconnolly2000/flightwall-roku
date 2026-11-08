@@ -6,8 +6,8 @@ from typing import Any
 
 from PIL import Image
 
-from flightwall_tools import tiles
-from flightwall_tools.geometry import BBox
+from skytraffic_tools import tiles
+from skytraffic_tools.geometry import BBox
 
 REGION = tiles.Region("test", 0, 1, 0, 2)
 PX = 16

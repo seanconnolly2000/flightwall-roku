@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from conftest import make_channel
-from flightwall_tools import brscheck
+from skytraffic_tools import brscheck
 
 
 def test_strip_code() -> None:

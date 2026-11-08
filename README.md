@@ -1,14 +1,14 @@
-# FlightWall for Roku
+# SkyTraffic for Roku
 
 A Roku channel **and screensaver** that shows the aircraft flying around your home on a
 minimal dark map, inspired by [OpenFlightWall](https://github.com/dilshanonline/OpenFlightWall)
 and [TheFlightWall](https://github.com/AxisNimble/TheFlightWall_OSS).
 
-![FlightWall on a Roku: the San Francisco Bay Area with nearby flights, the nearest flight's airline, route and altitude, other aircraft, and a five-day forecast](store/screenshots/flightwall-1.jpg)
+![SkyTraffic on a Roku: the San Francisco Bay Area with nearby flights, the nearest flight's airline, route and altitude, other aircraft, and a five-day forecast](store/screenshots/skytraffic-1.jpg)
 
 | Nearest flight, routes and logos | Settings screen (first run) |
 |---|---|
-| ![A second view with a Frontier flight to Los Angeles as the nearest aircraft](store/screenshots/flightwall-2.jpg) | ![The settings screen: ZIP code, radius, data source, OpenSky credentials, poll interval and display options](store/screenshots/flightwall-settings.jpg) |
+| ![A second view with a Frontier flight to Los Angeles as the nearest aircraft](store/screenshots/skytraffic-2.jpg) | ![The settings screen: ZIP code, radius, data source, OpenSky credentials, poll interval and display options](store/screenshots/skytraffic-settings.jpg) |
 
 - **Minimal map built for older sticks**: land is black, water is dark blue, with major
   airports and city labels for orientation. The map is pre-rendered into small tiles at
@@ -54,15 +54,15 @@ Everything is keyless and free by default. Data sources:
 ## Install and start
 
 ```bash
-cd roku-flightwall
+cd roku-skytraffic
 uv sync                       # creates .venv with Pillow + dev tools
-uv run flightwall all         # downloads map/zip/airport data, builds tiles and artwork,
-                              # runs static checks, writes dist/flightwall.zip and
-                              # dist/flightwall-screensaver.zip
+uv run skytraffic all         # downloads map/zip/airport data, builds tiles and artwork,
+                              # runs static checks, writes dist/skytraffic.zip and
+                              # dist/skytraffic-screensaver.zip
 ```
 
 The generated data and artwork are already checked in under `roku/data` and `roku/images`,
-so `uv run flightwall package` alone is enough if you only changed BrightScript.
+so `uv run skytraffic package` alone is enough if you only changed BrightScript.
 
 ### Side-load onto the Roku
 
@@ -70,18 +70,18 @@ Review the code first if you like (`roku/` is the whole channel), then:
 
 ```bash
 cp .env.example .env            # then fill in ROKU_HOST and ROKU_DEV_PASSWORD
-uv run flightwall deploy
+uv run skytraffic deploy
 ```
 
 The CLI reads `.env` from the project root (it is git-ignored). Flags override it, so
-`uv run flightwall deploy --host <roku-ip> --password <pw>` works without a `.env`, as does
+`uv run skytraffic deploy --host <roku-ip> --password <pw>` works without a `.env`, as does
 setting `ROKU_DEV_PASSWORD` in the environment.
 
 `deploy` runs the static checks, zips `roku/`, and posts the package to the Roku's
 Development Application Installer (HTTP digest auth, user `rokudev`). The channel launches
-automatically. You can also upload `dist/flightwall.zip` by hand at `http://<roku-ip>/`.
+automatically. You can also upload `dist/skytraffic.zip` by hand at `http://<roku-ip>/`.
 
-To remove it later: `uv run flightwall delete --host <roku-ip>`.
+To remove it later: `uv run skytraffic delete --host <roku-ip>`.
 
 ### First run
 
@@ -98,7 +98,7 @@ curl -d "" "http://<roku-ip>:8060/launch/dev?zip=94110&radius=50&poll=20&provide
 
 (`poll` is the refresh interval in seconds, 5 to 600; `provider` is adsbfi, adsblol or opensky; all parameters are optional.)
 
-To see what the TV is showing without walking over: `uv run flightwall screenshot --host <ip>`
+To see what the TV is showing without walking over: `uv run skytraffic screenshot --host <ip>`
 writes `dist/screenshot.jpg` using the installer's screenshot utility.
 
 Settings also include the data source, OpenSky credentials, poll interval, route lookups,
@@ -127,22 +127,22 @@ build is produced alongside the channel. The two share the same code. Side-loade
 share settings (one developer registry); Channel Store installs of the app and the screensaver
 keep separate settings.
 
-1. Side-load the combined build first (`flightwall deploy`) and set your ZIP and radius.
-2. Side-load the screensaver build: `uv run flightwall deploy --host <ip> --screensaver-only`
+1. Side-load the combined build first (`skytraffic deploy`) and set your ZIP and radius.
+2. Side-load the screensaver build: `uv run skytraffic deploy --host <ip> --screensaver-only`
    (a Roku holds one side-loaded app at a time; this replaces the channel build).
-3. On the Roku: **Settings > Theme > Screensavers**, pick **FlightWall**. "Change screensaver
+3. On the Roku: **Settings > Theme > Screensavers**, pick **SkyTraffic**. "Change screensaver
    settings" opens the same settings screen, so ZIP, radius, source and credentials can also be
    changed from there.
 4. Set the wait time under Settings > Theme > Screensavers > Wait time.
 
-If your Roku lists FlightWall under Screensavers while the combined build is installed, you can
+If your Roku lists SkyTraffic under Screensavers while the combined build is installed, you can
 skip step 2 and keep the channel and screensaver in one package.
 
 ## Running it all day: screensaver vs. channel
 
 Roku OS exits any channel that has had no remote-control input for two hours
-(`EXIT_IDLE_AUTO_EXIT` in the debug console). There is no setting to disable it and FlightWall
-does not try to trick it. For an always-on wall display, make FlightWall the **screensaver**:
+(`EXIT_IDLE_AUTO_EXIT` in the debug console). There is no setting to disable it and SkyTraffic
+does not try to trick it. For an always-on wall display, make SkyTraffic the **screensaver**:
 the OS starts it itself after the idle wait time and keeps it up until a button is pressed.
 Use the channel for setup and for watching interactively.
 
@@ -151,7 +151,7 @@ Use the channel for setup and for watching interactively.
 Streaming sticks have a 100 MB texture pool that is shared with Roku's own home screen, which
 keeps around 70 MB of artwork resident. When that pool is exhausted, SceneGraph silently stops
 drawing new or updated images and text while untouched items stay on screen: the map circle and
-an empty panel remain, everything live disappears. FlightWall therefore keeps its own footprint
+an empty panel remain, everything live disappears. SkyTraffic therefore keeps its own footprint
 small: no full-HD splash (it stays resident for the life of the app), a half-resolution mask,
 map tiles decoded at no more than 448 px, short trails, and a watchdog that writes "texture
 memory low" to the activity log when a tile fails to load. Running the channel and its
@@ -164,7 +164,7 @@ loses power. Things that help, in order:
 
 1. **Power the stick from its wall adapter**, not a USB port on the receiver or TV. Marginal
    USB power is the most common cause of intermittent blank screens on sticks, and every poll
-   is a Wi-Fi plus TLS burst that briefly raises the stick's power draw. FlightWall now reuses
+   is a Wi-Fi plus TLS burst that briefly raises the stick's power draw. SkyTraffic now reuses
    its HTTPS connections between polls, redraws only what changed, and updates the clock once a
    minute instead of once a second, so its duty cycle is low, but it cannot fix a power supply.
 2. **Settings > System > Power > Auto power savings: off.** Otherwise the stick sleeps after a
@@ -182,7 +182,7 @@ loses power. Things that help, in order:
 - OpenSky without credentials gives about 400 credits a day (one 10-second poll burns a credit),
   so it is best used with a free account:
   1. Register at <https://opensky-network.org/>, open your account page, create an **API client**.
-  2. In FlightWall settings enter the **OpenSky client ID** and **client secret**, choose
+  2. In SkyTraffic settings enter the **OpenSky client ID** and **client secret**, choose
      **OpenSky Network** as the data source, Save.
   The app fetches an OAuth2 token, refreshes it before it expires, and shows the remaining
   daily credits in the status line.
@@ -192,12 +192,12 @@ loses power. Things that help, in order:
 ```bash
 uv run pytest                 # Python tooling tests, 100% branch coverage enforced
 uv run ruff check . && uv run ruff format --check . && uv run mypy
-uv run flightwall check       # BrightScript/SceneGraph static checks (block balance,
+uv run skytraffic check       # BrightScript/SceneGraph static checks (block balance,
                               # terminators, script and pkg:/ references, manifest)
-uv run flightwall run-tests --host <roku-ip>   # on-device unit tests via Roku's framework
+uv run skytraffic run-tests --host <roku-ip>   # on-device unit tests via Roku's framework
 ```
 
-`run-tests` side-loads `dist/flightwall-tests.zip`, launches it with `RunTests=true`, captures the
+`run-tests` side-loads `dist/skytraffic-tests.zip`, launches it with `RunTests=true`, captures the
 BrightScript console on port 8085 and exits non-zero on any failure. The same console
 (`telnet <roku-ip> 8085`) shows runtime errors from the channel itself.
 
@@ -216,16 +216,16 @@ roku/                      The channel (zip this directory = the package)
   images/tiles/            1-degree land/water tiles + index.json (generated)
   images/planes/           36 pre-rotated plane sprites (generated)
   data/                    zips.txt, airports.json, cities.json (generated)
-tools/flightwall_tools/    Python CLI: build-data, images, check, package, deploy, run-tests, screenshot, delete
+tools/skytraffic_tools/    Python CLI: build-data, images, check, package, deploy, run-tests, screenshot, delete
 tests/                     pytest suite for the tooling
 ```
 
 ### Docker
 
 ```bash
-docker build -t flightwall-tools .
-docker run --rm -v "$PWD:/work" flightwall-tools all
-docker run --rm -v "$PWD:/work" -e ROKU_DEV_PASSWORD flightwall-tools deploy --host <roku-ip>
+docker build -t skytraffic-tools .
+docker run --rm -v "$PWD:/work" skytraffic-tools all
+docker run --rm -v "$PWD:/work" -e ROKU_DEV_PASSWORD skytraffic-tools deploy --host <roku-ip>
 ```
 
 ## Security and compliance notes
@@ -234,10 +234,10 @@ docker run --rm -v "$PWD:/work" -e ROKU_DEV_PASSWORD flightwall-tools deploy --h
   over HTTPS. Nothing is sent anywhere else, and the tooling never phones home.
 - **Secrets**: the developer password is read from `--password`, `ROKU_DEV_PASSWORD` or an
   interactive prompt and is never written to disk. OpenSky credentials live only in the Roku's
-  per-channel registry (`flightwall` section) and are entered on the TV.
+  per-channel registry (`skytraffic` section) and are entered on the TV.
 - **Audit trail**: API calls (time, source, HTTP status, aircraft count, latency), ZIP lookups
   and settings changes are appended to a ring buffer in a separate registry section
-  (`flightwall_audit`), viewable on screen with Play. The device identity is logged at start.
+  (`skytraffic_audit`), viewable on screen with Play. The device identity is logged at start.
 - **Access control**: a sideloaded channel is only installable with the Roku developer password;
   there are no user accounts in the app itself. RBAC and SSO do not apply to a single-user TV
   screensaver and were deliberately not added.
@@ -256,29 +256,29 @@ FHD screenshots and a step-by-step guide (`store/SUBMISSION.md`). The tooling ca
 device signing key and produce the signed package:
 
 ```bash
-uv run flightwall genkey                                  # once; save the password in .env
-uv run flightwall deploy --screensaver-only               # screensaver build: no Main()
-uv run flightwall sign                                    # -> dist/flightwall-screensaver-<version>.pkg
-uv run flightwall deploy --channel-only                   # channel build: no screensaver code
-uv run flightwall sign --variant channel                  # -> dist/flightwall-channel-<version>.pkg
+uv run skytraffic genkey                                  # once; save the password in .env
+uv run skytraffic deploy --screensaver-only               # screensaver build: no Main()
+uv run skytraffic sign                                    # -> dist/skytraffic-screensaver-<version>.pkg
+uv run skytraffic deploy --channel-only                   # channel build: no screensaver code
+uv run skytraffic sign --variant channel                  # -> dist/skytraffic-channel-<version>.pkg
 ```
 
 Roku treats channels and screensavers as separate app types, each its own Channel Store listing
 with its own package, and its static analysis rejects a package that mixes them. The type is
 read from the manifest: a screensaver has `screensaver_title` and no `title`. Submit each type
 from its own build; the default (combined) build is for local side-loading only. Each store
-package carries its own splash screen ("FlightWall App" or "FlightWall Screensaver", the
+package carries its own splash screen ("SkyTraffic App" or "SkyTraffic Screensaver", the
 latter saying that it runs when the Roku is idle), because a screensaver opened from its
 store page has no `Main()` to run and stays on that splash.
 
 The signed `.pkg` lands in `dist/`, named with the manifest version (for example
-`flightwall-channel-1.0.4.pkg`). Upload that file, not the `.zip` (the dashboard rejects
+`skytraffic-channel-1.0.4.pkg`). Upload that file, not the `.zip` (the dashboard rejects
 zips as "incorrectly packaged"); the zips are for side-loading only. Filling in the listing and
 passing Roku's certification review happen in the Roku Developer Dashboard under your own account.
 
 ## Credits and licenses
 
-FlightWall is released under the [MIT License](LICENSE). It was written from scratch for Roku,
+SkyTraffic is released under the [MIT License](LICENSE). It was written from scratch for Roku,
 but its design follows two open-source projects, both licensed under the Apache License 2.0:
 
 - **[OpenFlightWall](https://github.com/dilshanonline/OpenFlightWall)** by Dilshan Wijesooriya.
@@ -302,16 +302,16 @@ Data and services, with their terms:
 | [adsb.lol](https://github.com/adsblol/api), [adsb.fi](https://github.com/adsbfi/opendata) aircraft positions | Community-run, free, dynamic rate limits |
 | [OpenSky Network](https://opensky-network.org/about/terms-of-use) aircraft positions | Free for non-commercial use under OpenSky's terms |
 | [adsbdb.com](https://www.adsbdb.com/) routes, airlines, aircraft registry | Community-run, free |
-| [OpenFlights](https://openflights.org/data) airline codes (`roku/data/airlines.txt`, plus `tools/flightwall_tools/data/airline_overrides.csv`) | Open Database License (ODbL) |
+| [OpenFlights](https://openflights.org/data) airline codes (`roku/data/airlines.txt`, plus `tools/skytraffic_tools/data/airline_overrides.csv`) | Open Database License (ODbL) |
 | [Open-Meteo](https://open-meteo.com/en/terms) forecasts | CC BY 4.0; attribution shown on screen |
 | Airline logos via `images.kiwi.com` | Public CDN; logos remain trademarks of their airlines |
 
 ## Troubleshooting
 
 - **"Install Failure" on deploy**: the Roku prints the compile error in its web installer and on
-  the console (`telnet <ip> 8085`). Run `uv run flightwall check` for the static checks first.
+  the console (`telnet <ip> 8085`). Run `uv run skytraffic check` for the static checks first.
 - **Blank map (no coastlines)**: the ZIP is outside the tiled regions (CONUS + Hawaii by default).
-  Build Alaska too with `uv run flightwall build-data --regions conus,hawaii,alaska`.
+  Build Alaska too with `uv run skytraffic build-data --regions conus,hawaii,alaska`.
 - **No aircraft**: increase the radius, check the status line for the HTTP status, or try another
   data source. Routes may read "Route unavailable" for private, military and GA flights.
 - **Planes do not point the right way**: tracks are rounded to 10-degree sprites on purpose; it

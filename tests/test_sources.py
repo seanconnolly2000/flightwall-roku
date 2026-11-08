@@ -6,7 +6,7 @@ from typing import Any, Self
 
 import pytest
 
-from flightwall_tools import sources
+from skytraffic_tools import sources
 
 
 class _Response:

@@ -14,7 +14,7 @@ sub runTask()
         return
     end if
     url = Weather_Url(Util_ToFloat(req.lat), Util_ToFloat(req.lon))
-    headers = { "User-Agent": "FlightWall-Roku/1.0", "Accept": "application/json" }
+    headers = { "User-Agent": "SkyTraffic-Roku/1.0", "Accept": "application/json" }
     response = Http_Request(m.http, "GET", url, headers, "", 15000)
     result.status = response.status
     if response.status <> 200 then

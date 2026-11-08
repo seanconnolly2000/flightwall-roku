@@ -76,10 +76,10 @@ SPLASH_SIZES = {
 # One splash per package type. A store screensaver launched like an app has no Main() and
 # sits on its splash, so that splash says what the screensaver is and how to turn it on.
 SPLASH_VARIANTS = {
-    "": ("FlightWall", "Nearby flights, live on your TV"),
-    "app": ("FlightWall App", "Nearby flights, live on your TV"),
+    "": ("SkyTraffic", "Nearby flights, live on your TV"),
+    "app": ("SkyTraffic App", "Nearby flights, live on your TV"),
     "screensaver": (
-        "FlightWall Screensaver",
+        "SkyTraffic Screensaver",
         "Runs when your Roku is idle\nTurn it on under Settings > Theme > Screensavers",
     ),
 }
@@ -89,8 +89,8 @@ SPLASH_VARIANTS = {
 # the app and the screensaver apart before they install either.
 POSTER_SIZE = (540, 405)
 POSTER_VARIANTS = {
-    "app": ("FlightWall App", "Nearby flights, live on your TV"),
-    "screensaver": ("FlightWall Screensaver", "Runs when your Roku is idle"),
+    "app": ("SkyTraffic App", "Nearby flights, live on your TV"),
+    "screensaver": ("SkyTraffic Screensaver", "Runs when your Roku is idle"),
 }
 
 
@@ -106,6 +106,10 @@ def build_posters(artwork_dir: Path) -> list[str]:
         name = poster_filename(variant)
         poster = branded_panel(POSTER_SIZE[0], POSTER_SIZE[1], subtitle, title=title)
         poster.convert("RGB").save(artwork_dir / name)
+        written.append(name)
+    for w, h in ICON_SIZES.values():
+        name = f"poster-{w}x{h}.png"
+        branded_panel(w, h).convert("RGB").save(artwork_dir / name)
         written.append(name)
     return written
 
@@ -293,7 +297,7 @@ def _draw_precipitation(draw: ImageDraw.ImageDraw, kind: str, big: float, s: flo
 
 
 def branded_panel(
-    width: int, height: int, subtitle: str = "", title: str = "FlightWall"
+    width: int, height: int, subtitle: str = "", title: str = "SkyTraffic"
 ) -> Image.Image:
     """Black panel with the plane mark, a title and optional subtitle lines (split on newlines)."""
     canvas = Image.new("RGBA", (width, height), BLACK)

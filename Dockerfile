@@ -1,9 +1,9 @@
-# Build container for the FlightWall tooling (data build, static checks, packaging, deploy).
+# Build container for the SkyTraffic tooling (data build, static checks, packaging, deploy).
 # The Roku channel itself runs on the Roku; nothing here serves traffic.
 #
-#   docker build -t flightwall-tools .
-#   docker run --rm -v "$PWD:/work" flightwall-tools all
-#   docker run --rm -v "$PWD:/work" -e ROKU_DEV_PASSWORD flightwall-tools deploy --host <roku-ip>
+#   docker build -t skytraffic-tools .
+#   docker run --rm -v "$PWD:/work" skytraffic-tools all
+#   docker run --rm -v "$PWD:/work" -e ROKU_DEV_PASSWORD skytraffic-tools deploy --host <roku-ip>
 
 FROM python:3.12-slim
 
@@ -19,8 +19,8 @@ COPY tools ./tools
 RUN uv sync --frozen --no-dev
 
 # Run as an unprivileged user; the project directory is mounted at /work.
-RUN useradd --create-home --uid 1000 flightwall
-USER flightwall
+RUN useradd --create-home --uid 1000 skytraffic
+USER skytraffic
 
-ENTRYPOINT ["/opt/venv/bin/flightwall", "--project-root", "/work"]
+ENTRYPOINT ["/opt/venv/bin/skytraffic", "--project-root", "/work"]
 CMD ["--help"]

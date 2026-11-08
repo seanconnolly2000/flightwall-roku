@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from flightwall_tools import package
+from skytraffic_tools import package
 
 
 def test_should_include() -> None:
